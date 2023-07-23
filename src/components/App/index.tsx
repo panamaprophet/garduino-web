@@ -15,7 +15,7 @@ export const App = () => {
     const [configuration, setConfiguration, saveConfiguration] = useControllerConfiguration(controllerId);
 
     const rebootController = () => publish(`controllers/${controllerId}/reboot/sub`);
-    // const updateState = () => publish(`controllers/${controllerId}/status/sub`);
+    const updateState = () => publish(`controllers/${controllerId}/status/sub`);
 
     const [isConnected, publish] = usePubSubClient({
         [`controllers/${controllerId}/status/pub`]: setState,
@@ -40,9 +40,9 @@ export const App = () => {
                 {configuration && <ControllerConfigurationForm state={configuration} onChange={setConfiguration} />}
 
                 <div className="flex gap-4 justify-end pt-3">
-                    {/* <Button onClick={updateState}>
-                        Update status
-                    </Button> */}
+                    <Button onClick={updateState}>
+                        Refresh
+                    </Button>
 
                     <Button onClick={saveConfiguration}>
                         Save
