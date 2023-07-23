@@ -1,16 +1,16 @@
 import { Time } from '../types';
 
 
-export const timeToHHmmArray = (time: Time) => time.split(':').map(Number) as [number, number];
+export const timeToHHmmArray = (time: Time) => time.split(':').map(Number) as [hours: number, minutes: number];
 
 export const millisecondsToHours = (ms: number) => ms / 1000 / 60 / 60;
 
 export const hoursToMilliseconds = (hours: number) => hours * 60 * 60 * 1000;
 
 export const timeToMilliseconds = (time: Time) => {
-    const [start, end] = timeToHHmmArray(time);
+    const [hours, minutes] = timeToHHmmArray(time);
 
-    return hoursToMilliseconds(start) + (end / 100 * 60) * 60 * 1000;
+    return hoursToMilliseconds(hours) + hoursToMilliseconds(minutes % 1);
 };
 
 export const millisecondsToTime = (duration: number) => {
