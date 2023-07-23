@@ -14,13 +14,16 @@ export const timeToMilliseconds = (time: Time) => {
 };
 
 export const millisecondsToTime = (duration: number) => {
-    const durationHours = millisecondsToHours(duration ?? 0);
-    const durationMinutes = millisecondsToHours(duration ?? 0) % 1 * 60;
+    const durationHours = millisecondsToHours(duration);
+    const durationMinutes = millisecondsToHours(duration) % 1 * 60;
 
-    return `${durationHours.toFixed().padStart(2, '0')}:${durationMinutes.toFixed().padStart(2, '0')}` as Time;
+    const hours = durationHours.toFixed().padStart(2, '0');
+    const minutes = durationMinutes.toFixed().padStart(2, '0');
+
+    return `${hours}:${minutes}` as Time;
 };
 
-export const getTimeByOnTimeAndDuration = (time: Time, duration: number) => {
+export const getTimeRangeInHours = (time: Time, duration: number): [onTime: number, offTime: number] => {
     const [onHours, onMinutes] = timeToHHmmArray(time);
     const onTime = onHours + onMinutes / 60;
 

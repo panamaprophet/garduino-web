@@ -1,71 +1,58 @@
 import { useEffect, useState } from 'react';
 import { usePubSubClient } from '../../hooks/usePubSubClient';
-import { getControllerConfiguration, saveControllerConfiguration } from '../../resolvers';
+import { useControllerConfiguration } from '../../hooks/useControllerConfiguration';
 import { ControllerConfigurationForm } from '../ControllerConfigurationForm';
-import { ControllerState } from '../ControllerState';
+import { ControllerStatePanel } from '../ControllerStatePanel';
 import { Input } from '../Input';
 import { Button } from '../Button';
-import * as Types from '../../types';
+import { ControllerId, ControllerState } from '../../types';
 
 
 export const App = () => {
-    const [controllerState, setControllerState] = useState<Types.ControllerState>();
-    const [controllerConfiguration, setControllerConfiguration] = useState<any>();
+    const controllerId: ControllerId = 'a36805cc-35de-4c50-99de-936719924199';
 
-    const controllerId: Types.ControllerId = 'a36805cc-35de-4c50-99de-936719924199';
-
-
-    const onStatusMessage = (message: Types.ControllerState) => setControllerState(message);
-
-    const onEventMessage = ({ temperature, humidity }: Pick<Types.ControllerState, 'humidity' | 'temperature'>) => setControllerState({ ...(controllerState || {} as Types.ControllerState), temperature, humidity });
+    const [state, setState] = useState<ControllerState>({} as any);
+    const [configuration, setConfiguration, saveConfiguration] = useControllerConfiguration(controllerId);
 
     const rebootController = () => publish(`controllers/${controllerId}/reboot/sub`);
-
-    const saveConfiguration = () => saveControllerConfiguration({ controllerId, ...controllerConfiguration });
-
+    // const updateState = () => publish(`controllers/${controllerId}/status/sub`);
 
     const [isConnected, publish] = usePubSubClient({
-        [`controllers/${controllerId}/status/pub`]: onStatusMessage,
-        [`controllers/${controllerId}/events/pub`]: onEventMessage,
+        [`controllers/${controllerId}/status/pub`]: setState,
+        [`controllers/${controllerId}/events/pub`]: ({ temperature, humidity }: { temperature: number, humidity: number }) => setState({ ...state, humidity, temperature }),
     });
 
-
     useEffect(() => {
-        if (isConnected) {
-            publish(`controllers/${controllerId}/status/sub`);
-        }
-
-        getControllerConfiguration(controllerId).then(setControllerConfiguration);
+        isConnected && publish(`controllers/${controllerId}/status/sub`);
     }, [isConnected]);
-
 
     return (
         <div className="p-4">
             <Input type="text" value={controllerId} />
 
-            {controllerConfiguration && (
-                <div>
-                    {!controllerState && <div className="p-4">Connecting...</div>}
+            <div>
+                {!state && <div className="p-4">Connecting...</div>}
 
-                    {controllerState && <ControllerState state={controllerState} />}
+                {state && <ControllerStatePanel state={state} />}
 
-                    <hr />
+                <hr />
 
-                    <ControllerConfigurationForm state={controllerConfiguration} onChange={setControllerConfiguration} />
+                {configuration && <ControllerConfigurationForm state={configuration} onChange={setConfiguration} />}
 
-                    <div className="flex gap-4 justify-end pt-3">
-                        <Button onClick={saveConfiguration}>
-                            Save
-                        </Button>
+                <div className="flex gap-4 justify-end pt-3">
+                    {/* <Button onClick={updateState}>
+                        Update status
+                    </Button> */}
 
-                        <Button onClick={rebootController} disabled={!isConnected}>
-                            Reboot
-                        </Button>
+                    <Button onClick={saveConfiguration}>
+                        Save
+                    </Button>
 
-                    </div>
-
+                    <Button onClick={rebootController} disabled={!isConnected}>
+                        Reboot
+                    </Button>
                 </div>
-            )}
+            </div>
         </div>
     );
 };

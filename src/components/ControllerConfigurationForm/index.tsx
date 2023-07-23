@@ -1,20 +1,18 @@
 import { ClockRange } from 'clock-range';
 import { Input, InputRange } from '../Input';
-import { getTimeByOnTimeAndDuration, hoursToMilliseconds, millisecondsToTime, timeToMilliseconds } from '../../helpers';
+import { Label } from '../Label';
+import { getTimeRangeInHours, hoursToMilliseconds, millisecondsToTime, timeToMilliseconds } from '../../helpers';
 import { ControllerConfiguration, Time } from '../../types.d';
 
 
-const labelClassList = 'flex flex-col gap-2 mb-4';
-
-
-export const ControllerConfigurationForm = <T extends ControllerConfiguration>({ state, onChange }: { state: T, onChange: (state: T) => void }) => {
-    const time = getTimeByOnTimeAndDuration(state.onTime, state.duration);
+export const ControllerConfigurationForm = ({ state, onChange }: { state: ControllerConfiguration, onChange: (state: ControllerConfiguration) => void }) => {
+    const time = getTimeRangeInHours(state.onTime, state.duration);
     const durationTime = millisecondsToTime(state.duration);
-    const fanSpeedPercentage = ((state.fanSpeed / 255) * 100).toFixed();
+    const fanSpeedPercentage = (state.fanSpeed / 255) * 100 | 0;
 
     const setOnTime = ([start, end]: [number, number]) => {
         const duration = hoursToMilliseconds(Math.abs(start > end ? 24 - start + end : end - start));
-        const onTime = [start, start % 1 * 60].map(time => time.toFixed().padStart(2, '0')).join(':');
+        const onTime = [start | 0, (start % 1 * 60) | 0].map(time => time.toFixed().padStart(2, '0')).join(':') as Time;
 
         onChange({ ...state, onTime, duration });
     };
@@ -22,13 +20,11 @@ export const ControllerConfigurationForm = <T extends ControllerConfiguration>({
     return (
         <div>
             <div className="w-72 h-72 p-4 mx-auto">
-                {/* @ts-ignore: should be fixed in clock-range package */}
                 <ClockRange range={time} onChange={setOnTime} />
             </div>
 
             <div className="flex gap-4 justify-between">
-
-                <label className={`${labelClassList} w-1/2`}>
+                <Label className="w-1/2">
                     On time:
 
                     <Input
@@ -36,21 +32,20 @@ export const ControllerConfigurationForm = <T extends ControllerConfiguration>({
                         value={state.onTime}
                         onChange={onTime => onChange({ ...state, onTime })}
                     />
-                </label>
+                </Label>
 
-                <label className={`${labelClassList} w-1/2`}>
+                <Label className="w-1/2">
                     Duration:
 
                     <Input
                         type="time"
                         value={durationTime}
-                        onChange={value => onChange({ ...state, duration: timeToMilliseconds(value as Time) })}
+                        onChange={value => onChange({ ...state, duration: timeToMilliseconds(value) })}
                     />
-                </label>
-
+                </Label>
             </div>
 
-            <label className={labelClassList}>
+            <Label>
                 Threshold temperature, ℃:
 
                 <Input
@@ -58,13 +53,13 @@ export const ControllerConfigurationForm = <T extends ControllerConfiguration>({
                     value={state.thresholdTemperature}
                     onChange={value => onChange({ ...state, thresholdTemperature: Number(value) })}
                 />
-            </label>
+            </Label>
 
-            <label className={labelClassList}>
+            <Label>
                 Fan speed: {fanSpeedPercentage}%
 
-                <InputRange value={state.fanSpeed} onChange={fanSpeed => onChange({ ...state, fanSpeed })} />
-            </label>
+                <InputRange value={fanSpeedPercentage} onChange={fanSpeed => onChange({ ...state, fanSpeed: fanSpeed * 2.55 })} />
+            </Label>
         </div>
     );
 };
