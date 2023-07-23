@@ -12,7 +12,7 @@ export const App = () => {
     const [controllerState, setControllerState] = useState<Types.ControllerState>();
     const [controllerConfiguration, setControllerConfiguration] = useState<any>();
 
-    const controllerId = 'a36805cc-35de-4c50-99de-936719924199';
+    const controllerId: Types.ControllerId = 'a36805cc-35de-4c50-99de-936719924199';
 
 
     const onStatusMessage = (message: Types.ControllerState) => setControllerState(message);

@@ -1,7 +1,7 @@
 import { ClockRange } from 'clock-range';
 import { Input, InputRange } from '../Input';
 import { getTimeByOnTimeAndDuration, hoursToMilliseconds, millisecondsToTime, timeToMilliseconds } from '../../helpers';
-import { ControllerConfiguration } from '../../types.d';
+import { ControllerConfiguration, Time } from '../../types.d';
 
 
 const labelClassList = 'flex flex-col gap-2 mb-4';
@@ -44,7 +44,7 @@ export const ControllerConfigurationForm = <T extends ControllerConfiguration>({
                     <Input
                         type="time"
                         value={durationTime}
-                        onChange={value => onChange({ ...state, duration: timeToMilliseconds(value) })}
+                        onChange={value => onChange({ ...state, duration: timeToMilliseconds(value as Time) })}
                     />
                 </label>
 

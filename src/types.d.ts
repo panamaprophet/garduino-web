@@ -1,3 +1,10 @@
+import { UUID } from 'crypto';
+
+
+export type ControllerId = UUID;
+
+export type Time = `${number}:${number}`;
+
 export interface ControllerState {
     temperature: number;
     humidity: number;
@@ -7,7 +14,7 @@ export interface ControllerState {
 }
 
 export interface ControllerConfiguration {
-    onTime: string;
+    onTime: Time;
     duration: number;
     fanSpeed: number;
     thresholdTemperature: number;
