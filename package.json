@@ -8,7 +8,8 @@
     "source": "src/index.html",
     "scripts": {
         "dev": "parcel",
-        "build": "parcel build"
+        "build": "parcel build",
+        "deploy": "amplify publish -c"
     },
     "devDependencies": {
         "@types/node": "^20.4.3",

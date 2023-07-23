@@ -28,7 +28,7 @@ export const App = () => {
     }, [isConnected]);
 
     return (
-        <div className="p-4">
+        <div className="p-4 max-w-md mx-auto">
             <Input type="text" value={controllerId} />
 
             <div>
