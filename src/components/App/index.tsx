@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { usePubSubClient } from '../../hooks/usePubSubClient';
 import { useControllerConfiguration } from '../../hooks/useControllerConfiguration';
-import { ControllerConfigurationForm } from '../ControllerConfigurationForm';
-import { ControllerStatePanel } from '../ControllerStatePanel';
+import { ConfigurationForm } from '../ConfigurationForm';
+import { StatePanel } from '../StatePanel';
 import { Input } from '../Input';
 import { Button } from '../Button';
 import { ControllerId, ControllerState } from '../../types';
@@ -33,11 +33,11 @@ export const App = () => {
             <div>
                 {!state && <div className="p-4">Connecting...</div>}
 
-                {state && <ControllerStatePanel state={state} />}
+                {state && <StatePanel state={state} />}
 
                 <hr />
 
-                {configuration && <ControllerConfigurationForm state={configuration} onChange={setConfiguration} />}
+                {configuration && <ConfigurationForm state={configuration} onChange={setConfiguration} />}
 
                 <div className="flex gap-4 justify-end pt-3">
                     <Button onClick={updateState}>

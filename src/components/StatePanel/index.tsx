@@ -2,7 +2,7 @@ import { Bulb, Drop, Fan, Temperature } from '../Icon';
 import { ControllerState } from '../../types';
 
 
-export const ControllerStatePanel = ({ state }: { state: ControllerState }) => {
+export const StatePanel = ({ state }: { state: ControllerState }) => {
     const isOn = 'isOn' in state ? (state.isOn ? 'On' : 'Off') : '-';
     const humidity = 'humidity' in state ? state.humidity : '-';
     const temperature = 'temperature' in state ? state.temperature : '-';
