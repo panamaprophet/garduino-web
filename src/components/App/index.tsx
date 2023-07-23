@@ -5,6 +5,7 @@ import { ConfigurationForm } from '../ConfigurationForm';
 import { StatePanel } from '../StatePanel';
 import { Input } from '../Input';
 import { Button } from '../Button';
+import { Arrows } from '../Icon';
 import { ControllerId, ControllerState } from '../../types';
 
 
@@ -39,9 +40,9 @@ export const App = () => {
 
                 {configuration && <ConfigurationForm state={configuration} onChange={setConfiguration} />}
 
-                <div className="flex gap-4 justify-end pt-3">
+                <div className="flex gap-2 justify-end pt-3">
                     <Button onClick={updateState}>
-                        Refresh
+                        <Arrows />
                     </Button>
 
                     <Button onClick={saveConfiguration}>
