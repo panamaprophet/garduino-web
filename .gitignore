@@ -23,3 +23,5 @@ amplifytools.xcconfig
 amplify/team-provider-info.json
 .parcel-cache/
 src/config.ts
+amplify/backend/hosting/S3AndCloudFront/template.json
+amplify/backend/hosting/S3AndCloudFront/parameters.json
