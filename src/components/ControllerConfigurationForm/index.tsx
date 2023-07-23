@@ -26,38 +26,22 @@ export const ControllerConfigurationForm = ({ state, onChange }: { state: Contro
             <div className="flex gap-4 justify-between">
                 <Label className="w-1/2">
                     On time:
-
-                    <Input
-                        type="time"
-                        value={state.onTime}
-                        onChange={onTime => onChange({ ...state, onTime })}
-                    />
+                    <Input type="time" value={state.onTime} onChange={onTime => onChange({ ...state, onTime })} />
                 </Label>
 
                 <Label className="w-1/2">
                     Duration:
-
-                    <Input
-                        type="time"
-                        value={durationTime}
-                        onChange={value => onChange({ ...state, duration: timeToMilliseconds(value) })}
-                    />
+                    <Input type="time" value={durationTime} onChange={value => onChange({ ...state, duration: timeToMilliseconds(value) })} />
                 </Label>
             </div>
 
             <Label>
                 Threshold temperature, ℃:
-
-                <Input
-                    type="number"
-                    value={state.thresholdTemperature}
-                    onChange={value => onChange({ ...state, thresholdTemperature: Number(value) })}
-                />
+                <Input type="number" value={state.thresholdTemperature} onChange={value => onChange({ ...state, thresholdTemperature: Number(value) })} />
             </Label>
 
             <Label>
                 Fan speed: {fanSpeedPercentage}%
-
                 <InputRange value={fanSpeedPercentage} onChange={fanSpeed => onChange({ ...state, fanSpeed: fanSpeed * 2.55 })} />
             </Label>
         </div>
