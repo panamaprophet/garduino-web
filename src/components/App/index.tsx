@@ -40,18 +40,22 @@ export const App = () => {
 
                 {configuration && <ConfigurationForm state={configuration} onChange={setConfiguration} />}
 
-                <div className="flex gap-2 justify-end pt-4">
-                    <Button onClick={updateState}>
-                        <Arrows />
-                    </Button>
+                <hr className="my-2.5" />
 
-                    <Button onClick={saveConfiguration}>
-                        Save
-                    </Button>
-
+                <div className="flex gap-2 justify-between pt-4">
                     <Button onClick={rebootController} disabled={!isConnected}>
                         Reboot
                     </Button>
+
+                    <div className="flex gap-2">
+                        <Button onClick={updateState}>
+                            <Arrows />
+                        </Button>
+
+                        <Button onClick={saveConfiguration}>
+                            Save
+                        </Button>
+                    </div>
                 </div>
             </div>
         </div>
