@@ -49,7 +49,7 @@ export const App = () => {
 
                     <div className="flex gap-2">
                         <Button onClick={updateState}>
-                            <Arrows />
+                            <span className={isConnected ? '' : 'block animate-spin'}><Arrows /></span>
                         </Button>
 
                         <Button onClick={saveConfiguration}>
