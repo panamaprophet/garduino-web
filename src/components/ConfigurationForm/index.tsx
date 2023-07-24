@@ -48,15 +48,17 @@ export const ConfigurationForm = ({ state, onChange }: { state: ControllerConfig
                 </Label>
             </div>
 
-            <Label>
-                Threshold temperature, ℃:
-                <Input type="number" value={state.thresholdTemperature} onChange={value => onChange({ ...state, thresholdTemperature: Number(value) })} />
-            </Label>
+            <div className="flex gap-4 justify-between">
+                <Label className="w-1/2">
+                    Threshold T: {state.thresholdTemperature}℃:
+                    <InputRange value={state.thresholdTemperature} onChange={value => onChange({ ...state, thresholdTemperature: value })} />
+                </Label>
 
-            <Label>
-                Fan speed: {fanSpeedPercentage}%
-                <InputRange value={fanSpeedPercentage} onChange={fanSpeed => onChange({ ...state, fanSpeed: fanSpeed * 2.55 })} />
-            </Label>
+                <Label className="w-1/2">
+                    Fan speed: {fanSpeedPercentage}%
+                    <InputRange value={fanSpeedPercentage} onChange={fanSpeed => onChange({ ...state, fanSpeed: fanSpeed * 2.55 })} />
+                </Label>
+            </div>
         </div>
     );
 };

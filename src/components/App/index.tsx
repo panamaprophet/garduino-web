@@ -28,7 +28,7 @@ export const App = () => {
     }, [isConnected]);
 
     return (
-        <div className="p-4 max-w-md mx-auto">
+        <div className="p-4 max-w-md mx-auto text-sm">
             <Input type="text" value={controllerId} />
 
             <div>
@@ -40,7 +40,7 @@ export const App = () => {
 
                 {configuration && <ConfigurationForm state={configuration} onChange={setConfiguration} />}
 
-                <div className="flex gap-2 justify-end pt-3">
+                <div className="flex gap-2 justify-end pt-4">
                     <Button onClick={updateState}>
                         <Arrows />
                     </Button>
