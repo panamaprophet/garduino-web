@@ -8,16 +8,17 @@ import { Dropdown } from '../Dropdown';
 import { Loader } from '../Loader';
 
 import { usePubSubClient } from '../../hooks/usePubSubClient';
+import { useLocationHash } from '../../hooks/useLocationHash';
 import { useControllerList } from '../../hooks/useControllerList';
 import { useControllerConfiguration } from '../../hooks/useControllerConfiguration';
 
 import { ControllerId, ControllerState } from '../../types';
 
-
 export const App = () => {
     const controllerIds = useControllerList();
 
-    const [controllerId, setControllerId] = useState<ControllerId>();
+    const [locationHash, setLocationHash] = useLocationHash();
+    const [controllerId, setControllerId] = useState<ControllerId>(locationHash as ControllerId);
     const [configuration, setConfiguration, saveConfiguration] = useControllerConfiguration(controllerId);
     const [state, setState] = useState<ControllerState>();
 
@@ -34,6 +35,16 @@ export const App = () => {
             publish(`controllers/${controllerId}/status/sub`);
         }
     }, [isConnected]);
+
+    useEffect(() => {
+        if (locationHash && locationHash !== controllerId) {
+            setControllerId(locationHash as ControllerId);
+        }
+
+        if (controllerId && !locationHash) {
+            setLocationHash(controllerId);
+        }
+    }, [locationHash, controllerId]);
 
     return (
         <div className="p-4 max-w-md mx-auto text-sm">
