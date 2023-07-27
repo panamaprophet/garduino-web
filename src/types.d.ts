@@ -14,6 +14,7 @@ export interface ControllerState {
 }
 
 export interface ControllerConfiguration {
+    controllerId: ControllerId;
     onTime: Time;
     duration: number;
     fanSpeed: number;

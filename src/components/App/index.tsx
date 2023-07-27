@@ -1,63 +1,80 @@
 import { useEffect, useState } from 'react';
-import { usePubSubClient } from '../../hooks/usePubSubClient';
-import { useControllerConfiguration } from '../../hooks/useControllerConfiguration';
+
 import { ConfigurationForm } from '../ConfigurationForm';
 import { StatePanel } from '../StatePanel';
-import { Input } from '../Input';
 import { Button } from '../Button';
 import { Arrows } from '../Icon';
+import { Dropdown } from '../Dropdown';
+import { Loader } from '../Loader';
+
+import { usePubSubClient } from '../../hooks/usePubSubClient';
+import { useControllerList } from '../../hooks/useControllerList';
+import { useControllerConfiguration } from '../../hooks/useControllerConfiguration';
+
 import { ControllerId, ControllerState } from '../../types';
 
 
 export const App = () => {
-    const controllerId: ControllerId = 'a36805cc-35de-4c50-99de-936719924199';
+    const controllerIds = useControllerList();
 
-    const [state, setState] = useState<ControllerState>({} as any);
+    const [controllerId, setControllerId] = useState<ControllerId>();
     const [configuration, setConfiguration, saveConfiguration] = useControllerConfiguration(controllerId);
+    const [state, setState] = useState<ControllerState>();
 
     const rebootController = () => publish(`controllers/${controllerId}/reboot/sub`);
     const updateState = () => publish(`controllers/${controllerId}/status/sub`);
 
-    const [isConnected, publish] = usePubSubClient({
+    const [isConnected, publish] = usePubSubClient(controllerId ? {
         [`controllers/${controllerId}/status/pub`]: setState,
-        [`controllers/${controllerId}/events/pub`]: ({ temperature, humidity }: { temperature: number, humidity: number }) => setState({ ...state, humidity, temperature }),
-    });
+        [`controllers/${controllerId}/events/pub`]: (data: { temperature: number, humidity: number }) => setState(Object.assign({}, state, data)),
+    } : {});
 
     useEffect(() => {
-        isConnected && publish(`controllers/${controllerId}/status/sub`);
+        if (isConnected && controllerId) {
+            publish(`controllers/${controllerId}/status/sub`);
+        }
     }, [isConnected]);
 
     return (
         <div className="p-4 max-w-md mx-auto text-sm">
-            <Input type="text" value={controllerId} />
+            <Dropdown
+                title="Select controller"
+                items={controllerIds}
+                selectedItem={controllerId}
+                onChange={setControllerId}
+            />
 
-            <div>
-                {!state && <div className="p-4">Connecting...</div>}
+            {controllerId && !(state && configuration) && (
+                <Loader status="Loading" />
+            )}
 
-                {state && <StatePanel state={state} />}
+            {controllerId && configuration && state && (
+                <>
+                    <StatePanel state={state} />
 
-                <hr />
+                    <hr />
 
-                {configuration && <ConfigurationForm state={configuration} onChange={setConfiguration} />}
+                    <ConfigurationForm state={configuration} onChange={setConfiguration} />
 
-                <hr className="my-2.5" />
+                    <hr className="my-2.5" />
 
-                <div className="flex gap-2 justify-between pt-4">
-                    <Button onClick={rebootController} disabled={!isConnected}>
-                        Reboot
-                    </Button>
-
-                    <div className="flex gap-2">
-                        <Button onClick={updateState}>
-                            <span className={isConnected ? '' : 'block animate-spin'}><Arrows /></span>
+                    <div className="flex gap-2 justify-between pt-4">
+                        <Button onClick={rebootController} disabled={!isConnected}>
+                            Reboot
                         </Button>
 
-                        <Button onClick={saveConfiguration}>
-                            Save
-                        </Button>
+                        <div className="flex gap-2">
+                            <Button onClick={updateState} disabled={!isConnected}>
+                                <Arrows />
+                            </Button>
+
+                            <Button onClick={saveConfiguration}>
+                                Save
+                            </Button>
+                        </div>
                     </div>
-                </div>
-            </div>
+                </>
+            )}
         </div>
     );
 };
