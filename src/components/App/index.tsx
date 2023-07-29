@@ -32,9 +32,9 @@ export const App = () => {
 
     useEffect(() => {
         if (isConnected && controllerId) {
-            publish(`controllers/${controllerId}/status/sub`);
+            updateState();
         }
-    }, [isConnected]);
+    }, [isConnected, controllerId]);
 
     useEffect(() => {
         if (locationHash && locationHash !== controllerId) {
