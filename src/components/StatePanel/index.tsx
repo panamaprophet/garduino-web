@@ -1,5 +1,5 @@
-import { Bulb, Drop, Fan, Temperature } from '../Icon';
-import { ControllerState } from '../../types';
+import { Bulb, Drop, Fan, Temperature } from '@/components/Icon';
+import { ControllerState } from '@/types';
 
 
 export const StatePanel = ({ state }: { state: ControllerState }) => {

@@ -1,4 +1,4 @@
-import { Time } from '../types';
+import { Time } from '@/types';
 
 
 export const timeToHHmmArray = (time: Time) => time.split(':').map(Number) as [hours: number, minutes: number];

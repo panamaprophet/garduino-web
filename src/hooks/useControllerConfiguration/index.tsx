@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { ControllerConfiguration, ControllerId } from '../../types';
-import config from '../../config';
-import { useAuth } from '../useAuth';
+import { ControllerConfiguration, ControllerId } from '@/types';
+import config from '@/config';
+import { useAuth } from '@/hooks/useAuth';
 
 
 const getControllerConfiguration = (controllerId: ControllerId) => {
