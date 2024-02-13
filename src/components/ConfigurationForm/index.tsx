@@ -1,6 +1,6 @@
 import { ClockRange } from 'clock-range';
-import { Input, InputRange } from '../Input';
-import { Label } from '../Label';
+import { Input, InputRange } from '@/components/Input';
+import { Label } from '@/components/Label';
 import {
     addHoursToTime,
     getTimeRangeInHours,
@@ -9,8 +9,8 @@ import {
     hoursToTime,
     millisecondsToTime,
     timeToMilliseconds,
-} from '../../helpers';
-import { ControllerConfiguration, Time } from '../../types.d';
+} from '@/helpers';
+import { ControllerConfiguration, Time } from '@/types';
 
 
 export const ConfigurationForm = ({ state, onChange }: { state: ControllerConfiguration, onChange: (state: ControllerConfiguration) => void }) => {

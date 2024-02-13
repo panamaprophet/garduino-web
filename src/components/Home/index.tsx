@@ -1,6 +1,6 @@
-import { useAuth } from '../../hooks/useAuth';
-import { App } from '../App';
-import { LoginForm } from '../LoginForm';
+import { useAuth } from '@/hooks/useAuth';
+import { App } from '@/components/App';
+import { LoginForm } from '@/components/LoginForm';
 
 export const Home = () => {
     const { isAuthenticated, signIn } = useAuth();

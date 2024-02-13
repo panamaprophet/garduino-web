@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Input } from '../Input';
-import { Button } from '../Button';
+import { Input } from '@/components/Input';
+import { Button } from '@/components/Button';
 
 
 export const LoginForm = ({ onSubmit }: { onSubmit: (credentials: { username: string, password: string }) => void }) => {

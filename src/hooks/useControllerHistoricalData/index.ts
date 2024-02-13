@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import config from '../../config';
-import { ControllerId } from '../../types';
+import config from '@/config';
+import { ControllerId } from '@/types';
 
 const getControllerHistoricalData = (controllerId: ControllerId, { startDate, endDate }: { startDate: number, endDate: number }) => {
     const url = `${config.dataCollectorApi}/${controllerId}?startDate=${startDate}&endDate=${endDate}`;

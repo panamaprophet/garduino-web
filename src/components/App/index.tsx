@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react';
 
-import { ConfigurationForm } from '../ConfigurationForm';
-import { StatePanel } from '../StatePanel';
-import { Button } from '../Button';
-import { Arrows } from '../Icon';
-import { Dropdown } from '../Dropdown';
-import { Loader } from '../Loader';
+import { ConfigurationForm } from '@/components/ConfigurationForm';
+import { StatePanel } from '@/components/StatePanel';
+import { Button } from '@/components/Button';
+import { Arrows } from '@/components/Icon';
+import { Dropdown } from '@/components/Dropdown';
+import { Loader } from '@/components/Loader';
 
-import { usePubSubClient } from '../../hooks/usePubSubClient';
-import { useLocationHash } from '../../hooks/useLocationHash';
-import { useControllerList } from '../../hooks/useControllerList';
-import { useControllerConfiguration } from '../../hooks/useControllerConfiguration';
+import { usePubSubClient } from '@/hooks/usePubSubClient';
+import { useLocationHash } from '@/hooks/useLocationHash';
+import { useControllerList } from '@/hooks/useControllerList';
+import { useControllerConfiguration } from '@/hooks/useControllerConfiguration';
 
-import { ControllerId, ControllerState } from '../../types';
+import { ControllerId, ControllerState } from '@/types';
 
 export const App = () => {
     const controllerIds = useControllerList();

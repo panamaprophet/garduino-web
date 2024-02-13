@@ -1,9 +1,9 @@
 import { createRoot } from 'react-dom/client';
 import { Analytics, Amplify, PubSub } from 'aws-amplify';
 import { AWSIoTProvider } from '@aws-amplify/pubsub';
-import { Home } from './components/Home';
-import amplifyConfig from './aws-exports';
-import config from './config';
+import { Home } from '@/components/Home';
+import amplifyConfig from '@/aws-exports';
+import config from '@/config';
 
 
 Analytics.disable();
