@@ -1,3 +1,5 @@
-declare const awsmobile: any;
+declare const awsmobile: {
+    [k: string]: unknown;
+}
 
-export = awsmobile;
+export default awsmobile;

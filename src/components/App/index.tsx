@@ -25,9 +25,12 @@ export const App = () => {
     const rebootController = () => publish(`controllers/${controllerId}/reboot/sub`);
     const updateState = () => publish(`controllers/${controllerId}/status/sub`);
 
+    const onStatusMessage = (data: ControllerState) => setState({ ...state, ...data });
+    const onUpdateMessage = (data: Pick<ControllerState, 'temperature' | 'humidity'>) => setState({ ...state!, ...data });
+
     const [isConnected, publish] = usePubSubClient(controllerId ? {
-        [`controllers/${controllerId}/status/pub`]: setState,
-        [`controllers/${controllerId}/events/pub`]: (data: { temperature: number, humidity: number }) => setState(Object.assign({}, state, data)),
+        [`controllers/${controllerId}/status/pub`]: onStatusMessage,
+        [`controllers/${controllerId}/events/pub`]: onUpdateMessage,
     } : {});
 
     useEffect(() => {
@@ -50,21 +53,19 @@ export const App = () => {
         <div className="p-4 max-w-md mx-auto text-sm">
             <Dropdown
                 title="Select controller"
-                items={controllerIds}
-                selectedItem={controllerId}
+                value={controllerId}
+                options={controllerIds}
                 onChange={setControllerId}
             />
 
-            {controllerId && !(state && configuration) && (
-                <Loader status="Loading" />
-            )}
+            <div className="border-b border-b-gray-200">
+                {state && <StatePanel state={state} />}
 
-            {controllerId && configuration && state && (
+                {!state && <Loader status="Loading" />}
+            </div>
+
+            {configuration && (
                 <>
-                    <StatePanel state={state} />
-
-                    <hr />
-
                     <ConfigurationForm state={configuration} onChange={setConfiguration} />
 
                     <hr className="my-2.5" />
