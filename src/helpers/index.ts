@@ -14,13 +14,13 @@ export const timeToMilliseconds = (time: Time) => {
 };
 
 export const millisecondsToTime = (duration: number) => {
-    const durationHours = millisecondsToHours(duration) % 24;
-    const durationMinutes = durationHours % 1 * 60 % 60;
+    const hours = millisecondsToHours(duration) % 24;
+    const minutes = (hours % 1 * 60) % 60;
 
-    const hours = durationHours.toFixed().padStart(2, '0');
-    const minutes = durationMinutes.toFixed().padStart(2, '0');
-
-    return `${hours}:${minutes}` as Time;
+    return [hours, minutes]
+        .map((value) => Math.trunc(value))
+        .map((value) => value.toString().padStart(2, '0'))
+        .join(':') as Time;
 };
 
 export const getTimeRangeInHours = (time: Time, duration: number): [onTime: number, offTime: number] => {
