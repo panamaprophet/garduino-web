@@ -2,10 +2,8 @@ import { ClockRange } from 'clock-range';
 import { Input, InputRange } from '@/components/Input';
 import { Label } from '@/components/Label';
 import {
-    addHoursToTime,
+    addDays,
     getTimeRangeInHours,
-    getTimeZoneOffset,
-    hoursToMilliseconds,
     hoursToTime,
     millisecondsToTime,
     timeToMilliseconds,
@@ -15,17 +13,18 @@ import { ControllerConfiguration, Time } from '@/types';
 
 export const ConfigurationForm = ({ state, onChange }: { state: ControllerConfiguration, onChange: (state: ControllerConfiguration) => void }) => {
     const durationTime = millisecondsToTime(state.duration);
-    const fanSpeedPercentage = (state.fanSpeed / 255) * 100 | 0;
-
-    const timezoneOffset = getTimeZoneOffset();
-    const timeRange = getTimeRangeInHours(state.onTime, state.duration);
-
-    const startTime = timeRange[0] - timezoneOffset;
-    const endTime = timeRange[1] - timezoneOffset;
+    const fanSpeedPercentage = Math.trunc((state.fanSpeed / 255) * 100);
+    const [startTime, endTime] = getTimeRangeInHours(state.onTime, state.duration);
 
     const setOnTime = ([start, end]: [number, number]) => {
-        const duration = hoursToMilliseconds(Math.abs(start >= end ? 24 - start + end : end - start));
-        const onTime = [(start + timezoneOffset) | 0, 60 * (start % 1) | 0].map(time => time.toString().padStart(2, '0')).join(':') as Time;
+        const on = new Date(`01/01/2024 ${hoursToTime(start)}`);
+        const off = new Date(`01/01/2024 ${hoursToTime(end)}`);
+
+        const duration = off > on
+            ? off.valueOf() - on.valueOf()
+            : addDays(off, 1).valueOf() - on.valueOf();
+
+        const onTime = `${on.getHours()}:${on.getMinutes()}` as Time;
 
         onChange({ ...state, onTime, duration });
     };
@@ -39,7 +38,7 @@ export const ConfigurationForm = ({ state, onChange }: { state: ControllerConfig
             <div className="flex gap-4 justify-between">
                 <Label className="w-1/2">
                     On time:
-                    <Input type="time" value={hoursToTime(startTime)} onChange={onTime => onChange({ ...state, onTime: addHoursToTime(onTime, timezoneOffset) })} />
+                    <Input type="time" value={hoursToTime(startTime)} onChange={onTime => onChange({ ...state, onTime })} />
                 </Label>
 
                 <Label className="w-1/2">
