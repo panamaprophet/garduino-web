@@ -14,13 +14,13 @@ export const timeToMilliseconds = (time: Time) => {
 };
 
 export const millisecondsToTime = (duration: number) => {
-    const durationHours = millisecondsToHours(duration) % 24;
-    const durationMinutes = durationHours % 1 * 60 % 60;
+    const hours = millisecondsToHours(duration) % 24;
+    const minutes = (hours % 1 * 60) % 60;
 
-    const hours = durationHours.toFixed().padStart(2, '0');
-    const minutes = durationMinutes.toFixed().padStart(2, '0');
-
-    return `${hours}:${minutes}` as Time;
+    return [hours, minutes]
+        .map((value) => Math.trunc(value))
+        .map((value) => value.toString().padStart(2, '0'))
+        .join(':') as Time;
 };
 
 export const getTimeRangeInHours = (time: Time, duration: number): [onTime: number, offTime: number] => {
@@ -39,3 +39,10 @@ export const getTimeZoneOffset = () => (new Date()).getTimezoneOffset() / 60;
 export const hoursToTime = (hours: number) => millisecondsToTime(hoursToMilliseconds(hours));
 
 export const addHoursToTime = (time: Time, hours: number) => millisecondsToTime(timeToMilliseconds(time) + hoursToMilliseconds(hours));
+
+export const addDays = (date: Date, days: number) => {
+    const dayInMilliseconds = 24 * 60 * 60 * 1000;
+    const millisecondsToAdd = dayInMilliseconds * days;
+
+    return new Date(date.valueOf() + millisecondsToAdd);
+};
