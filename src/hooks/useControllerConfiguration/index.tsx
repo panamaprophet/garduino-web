@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ControllerConfiguration, ControllerId } from '@/types';
 import config from '@/config';
 import { useAuth } from '@/hooks/useAuth';
+import { addHours, getTimeZoneOffset, subHours } from '@/helpers';
 
 
 const getControllerConfiguration = (controllerId: ControllerId) => {
@@ -10,7 +11,7 @@ const getControllerConfiguration = (controllerId: ControllerId) => {
     return fetch(url).then<ControllerConfiguration>(response => response.json());
 };
 
-const saveControllerConfiguration = ({ controllerId, ...configuration }: { controllerId: ControllerId }, options: { jwt: string }) => {
+const saveControllerConfiguration = ({ controllerId, ...configuration }: ControllerConfiguration, options: { jwt: string }) => {
     const url = `${config.configurationApi}/${controllerId}`;
     const body = JSON.stringify(configuration);
 
@@ -32,7 +33,11 @@ export const useControllerConfiguration = (controllerId: ControllerId | undefine
             return;
         }
 
-        getControllerConfiguration(controllerId).then(setState);
+        getControllerConfiguration(controllerId).then((configuration) => {
+            const onTime = subHours(configuration.onTime, getTimeZoneOffset());
+
+            setState({ ...configuration, onTime });
+        });
     }, [controllerId]);
 
     const setConfiguration = (changes: Partial<ControllerConfiguration>) => setState({ ...state!, ...changes });
@@ -42,7 +47,13 @@ export const useControllerConfiguration = (controllerId: ControllerId | undefine
             throw Error('no jwt token was found');
         }
 
-        saveControllerConfiguration({ controllerId: controllerId!, ...state }, { jwt });
+        if (!state) {
+            throw Error('state is empty');
+        }
+
+        const onTime = addHours(state.onTime, getTimeZoneOffset());
+
+        saveControllerConfiguration({ ...state, onTime }, { jwt });
     };
 
     return [
