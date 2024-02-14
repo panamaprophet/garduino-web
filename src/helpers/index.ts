@@ -38,7 +38,9 @@ export const getTimeZoneOffset = () => (new Date()).getTimezoneOffset() / 60;
 
 export const hoursToTime = (hours: number) => millisecondsToTime(hoursToMilliseconds(hours));
 
-export const addHoursToTime = (time: Time, hours: number) => millisecondsToTime(timeToMilliseconds(time) + hoursToMilliseconds(hours));
+export const addHours = (time: Time, hours: number) => millisecondsToTime(timeToMilliseconds(time) + hoursToMilliseconds(hours));
+
+export const subHours = (time: Time, hours: number) => millisecondsToTime(timeToMilliseconds(time) - hoursToMilliseconds(hours));
 
 export const addDays = (date: Date, days: number) => {
     const dayInMilliseconds = 24 * 60 * 60 * 1000;
