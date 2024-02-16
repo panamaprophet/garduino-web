@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Hub } from 'aws-amplify/utils';
 import { PubSub, CONNECTION_STATE_CHANGE, ConnectionState } from '@aws-amplify/pubsub';
-import config from '@/config';
 
 const client = new PubSub({
-    endpoint: config.endpoint,
-    region: config.region,
+    endpoint: import.meta.env.VITE_WS_API,
+    region: import.meta.env.VITE_REGION,
 });
 
 export const usePubSubClient = <Topics extends { [k: string]: any }>(topics: Topics) => {
@@ -35,7 +34,7 @@ export const usePubSubClient = <Topics extends { [k: string]: any }>(topics: Top
 
             setConnected(connectionState === 'Connected');
 
-            console.log('[pubsub] connection changed to %s', connectionState);
+            console.log('[pubsub] connection changed to', connectionState);
         });
 
         console.log('[pubsub] subscribing...');
@@ -47,10 +46,10 @@ export const usePubSubClient = <Topics extends { [k: string]: any }>(topics: Top
                     .subscribe({ topics: topic })
                     .subscribe({
                         next: (data) => {
-                            console.log(data);
+                            console.log('[pubsub] message:', data);
                             return callback(data as Topics[typeof topic]);
                         },
-                        error: error => console.log('[pubsub] error: %o', error),
+                        error: error => console.log('[pubsub] error:', error),
                     })
             });
 
