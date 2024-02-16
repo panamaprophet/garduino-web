@@ -1,18 +1,16 @@
 import { useEffect, useState } from 'react';
 import { ControllerConfiguration, ControllerId } from '@/types';
-import config from '@/config';
 import { useAuth } from '@/hooks/useAuth';
 import { addHours, getTimeZoneOffset, subHours } from '@/helpers';
 
-
 const getControllerConfiguration = (controllerId: ControllerId) => {
-    const url = `${config.configurationApi}/${controllerId}?raw=true`;
+    const url = `${import.meta.env.VITE_CONFIGURATION_API}/${controllerId}?raw=true`;
 
     return fetch(url).then<ControllerConfiguration>(response => response.json());
 };
 
 const saveControllerConfiguration = ({ controllerId, ...configuration }: ControllerConfiguration, options: { jwt: string }) => {
-    const url = `${config.configurationApi}/${controllerId}`;
+    const url = `${import.meta.env.VITE_CONFIGURATION_API}/${controllerId}`;
     const body = JSON.stringify(configuration);
 
     return fetch(url, {

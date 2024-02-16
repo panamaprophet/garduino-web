@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { ControllerId } from '@/types';
-import config from '@/config';
-
 
 export const useControllerList = () => {
     const [state, setState] = useState<ControllerId[]>([]);
@@ -11,7 +9,7 @@ export const useControllerList = () => {
     useEffect(() => {
         if (!jwt) return;
 
-        fetch(config.configurationApi, {
+        fetch(import.meta.env.VITE_CONFIGURATION_API, {
             headers: {
                 Authorization: `Bearer ${jwt}`,
             },
