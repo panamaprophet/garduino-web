@@ -1,22 +1,18 @@
 import { createRoot } from 'react-dom/client';
-import { Analytics, Amplify, PubSub } from 'aws-amplify';
-import { AWSIoTProvider } from '@aws-amplify/pubsub';
+import { Amplify } from 'aws-amplify';
 import { Home } from '@/components/Home';
-import amplifyConfig from '@/aws-exports';
-import config from '@/config';
+import config from './config';
+config
 
-
-Analytics.disable();
-
-// Amplify.Logger.LOG_LEVEL = 'VERBOSE';
-
-Amplify.addPluggable(new AWSIoTProvider({
-    aws_pubsub_region: config.region,
-    aws_pubsub_endpoint: config.endpoint,
-}));
-
-Amplify.configure(amplifyConfig);
-PubSub.configure(amplifyConfig);
+Amplify.configure({
+    Auth: {
+        Cognito: {
+            userPoolId: config.cognitoUserPoolId,
+            userPoolClientId: config.cognitoUserPoolClientId,
+            identityPoolId: config.cognitoIdentityPoolId,
+        },
+    },
+});
 
 const container = document.getElementById('app')!;
 const root = createRoot(container);
