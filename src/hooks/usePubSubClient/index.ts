@@ -1,42 +1,66 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Hub, HubCallback } from '@aws-amplify/core';
-import { PubSub, CONNECTION_STATE_CHANGE } from '@aws-amplify/pubsub';
+import { Hub } from 'aws-amplify/utils';
+import { PubSub, CONNECTION_STATE_CHANGE, ConnectionState } from '@aws-amplify/pubsub';
+import config from '@/config';
+
+const client = new PubSub({
+    endpoint: config.endpoint,
+    region: config.region,
+});
 
 export const usePubSubClient = <Topics extends { [k: string]: any }>(topics: Topics) => {
     const [isConnected, setConnected] = useState(false);
 
     const publish = useCallback((topic: string, message = {}) => {
-        return PubSub.publish(topic, message);
-    }, []);
+        console.log(`[pubsub] publish to ${topic}:`, message);
 
-    const handleConnectionState: HubCallback = useCallback(({ payload }) => {
-        if (payload.event !== CONNECTION_STATE_CHANGE) {
-            return;
-        }
-
-        const { data } = payload;
-        const { connectionState } = data;
-
-        setConnected(connectionState === 'Connected');
-
-        console.log('connection changed to %s', connectionState);
+        return client.publish({ topics: topic, message });
     }, []);
 
     useEffect(() => {
-        const unsubscribe = Hub.listen('pubsub', handleConnectionState);
+        const unsubscribe = Hub.listen('pubsub', ({ payload }: {
+            payload: {
+                event: string;
+                data: { connectionState: ConnectionState };
+            };
+        }) => {
+            console.log('[pubsub] pubsub event happened', payload);
 
-        Object
+            if (payload.event !== CONNECTION_STATE_CHANGE) {
+                return;
+            }
+
+            const { data } = payload;
+            const { connectionState } = data;
+
+            setConnected(connectionState === 'Connected');
+
+            console.log('[pubsub] connection changed to %s', connectionState);
+        });
+
+        console.log('[pubsub] subscribing...');
+
+        const subscibtions = Object
             .entries(topics)
-            .forEach(([topic, callback]) => {
-                PubSub
-                    .subscribe(topic)
+            .map(([topic, callback]) => {
+                return client
+                    .subscribe({ topics: topic })
                     .subscribe({
-                        next: ({ value }) => callback(value as Topics[typeof topic]),
-                        error: error => console.log('pubsub error = %o', error),
+                        next: (data) => {
+                            console.log(data);
+                            return callback(data as Topics[typeof topic]);
+                        },
+                        error: error => console.log('[pubsub] error: %o', error),
                     })
             });
 
-        return unsubscribe();
+        return () => {
+            console.log('[pubsub] unsubscribing...');
+
+            subscibtions.forEach(subscribtion => subscribtion.unsubscribe());
+
+            unsubscribe();
+        };
     }, []);
 
     return [isConnected, publish] as const;

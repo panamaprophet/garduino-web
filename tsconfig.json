@@ -1,9 +1,9 @@
 {
     "compilerOptions": {
-        "target": "es2016",
-        "jsx": "preserve",
-        "module": "commonjs",
-        "rootDir": "./src",
+        "target": "ESNext",
+        "jsx": "react-jsx",
+        "module": "ESNext",
+        "moduleResolution": "Node",
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
         "strict": true,
@@ -27,5 +27,6 @@
         "paths": {
             "@/*": ["./src/*"]
         }
-    }
+    },
+    "include": ["src"]
 }

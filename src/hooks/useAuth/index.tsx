@@ -1,44 +1,43 @@
-import { Auth } from 'aws-amplify';
-import { CognitoUser } from 'amazon-cognito-identity-js';
+import { getCurrentUser, fetchAuthSession, signIn, signOut, AuthUser } from '@aws-amplify/auth';
 import { useState, useEffect } from 'react';
 
-
 export const useAuth = () => {
-    const [user, setUser] = useState<CognitoUser | null>(null);
-    const [isAuthenticated, setAuthenticated] = useState(false);
-    const [jwt, setJwt] = useState(null);
+    const [user, setUser] = useState<AuthUser | null>(null);
+    const [jwt, setJwt] = useState<string | null>(null);
+
+    const getAuthDetails = () => Promise.all([getCurrentUser(), fetchAuthSession()]);
 
     useEffect(() => {
-        Auth.configure({ mandatorySignIn: true });
-
-        Auth
-            .currentAuthenticatedUser()
-            .then(user => {
+        getAuthDetails()
+            .then(([user, session]) => {
                 setUser(user);
-                setJwt(user.signInUserSession.idToken.jwtToken);
+                setJwt(session.tokens?.idToken?.toString() ?? null);
             })
-            .then(() => setAuthenticated(true))
-            .catch((error) => {
-                console.log(error);
+            .catch((error: unknown) => {
+                console.log('[auth] error:', error);
                 setUser(null);
+                setJwt(null);
             });
     }, []);
+
+    const isAuthenticated = Boolean(user && jwt);
 
     return {
         user,
         jwt,
         isAuthenticated,
-        signIn: (params: { username: string, password: string }) => {
-            return Auth.signIn(params).then((user) => {
-                setUser(user);
-                setAuthenticated(true);
-            });
+        signIn: async (params: { username: string, password: string }) => {
+            await signIn(params);
+            const [user, session] = await getAuthDetails();
+
+            setUser(user);
+            setJwt(session.tokens?.idToken?.toString() ?? null);
         },
-        signOut: () => {
-            return Auth.signOut().then(() => {
-                setUser(null);
-                setAuthenticated(false);
-            });
+        signOut: async () => {
+            await signOut();
+
+            setUser(null);
+            setJwt(null);
         },
     };
 };
