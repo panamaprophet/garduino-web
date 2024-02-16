@@ -2,7 +2,6 @@ import { createRoot } from 'react-dom/client';
 import { Amplify } from 'aws-amplify';
 import { Home } from '@/components/Home';
 import config from './config';
-config
 
 Amplify.configure({
     Auth: {

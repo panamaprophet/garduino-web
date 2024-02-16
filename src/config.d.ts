@@ -4,6 +4,9 @@ declare const config: {
     controllerId: string;
     configurationApi: string;
     dataCollectorApi: string;
+    cognitoUserPoolId: string;
+    cognitoUserPoolClientId: string;
+    cognitoIdentityPoolId: string;
 };
 
 export = config;
