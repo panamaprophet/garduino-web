@@ -13,8 +13,9 @@ import { useControllerList } from '@/hooks/useControllerList';
 import { useControllerConfiguration } from '@/hooks/useControllerConfiguration';
 
 import { ControllerId, ControllerState } from '@/types';
+import { withAuth } from '@/hooks/useAuth';
 
-export const App = () => {
+export const App = withAuth(() => {
     const controllerIds = useControllerList();
 
     const [locationHash, setLocationHash] = useLocationHash();
@@ -89,4 +90,4 @@ export const App = () => {
             )}
         </div>
     );
-};
+});

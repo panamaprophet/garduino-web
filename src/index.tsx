@@ -1,6 +1,7 @@
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Amplify } from 'aws-amplify';
-import { Home } from '@/components/Home';
+import { App } from '@/components/App';
 
 Amplify.configure({
     Auth: {
@@ -12,7 +13,16 @@ Amplify.configure({
     },
 });
 
-const container = document.getElementById('app')!;
+const container = document.getElementById('app');
+
+if (!container) {
+    throw Error('#app not found');
+}
+
 const root = createRoot(container);
 
-root.render(<Home />);
+root.render(
+    <StrictMode>
+        <App />
+    </StrictMode>
+);

@@ -13,10 +13,12 @@ export const usePubSubClient = <Topics extends { [k: string]: any }>(topics: Top
     const publish = useCallback((topic: string, message = {}) => {
         console.log(`[pubsub] publish to ${topic}:`, message);
 
-        return client.publish({ topics: topic, message });
+        return client?.publish({ topics: topic, message });
     }, []);
 
-    useEffect(() => {
+    useEffect(() => {      
+        console.log('[pubsub] subscribing to connection change...');
+
         const unsubscribe = Hub.listen('pubsub', ({ payload }: {
             payload: {
                 event: string;
@@ -37,13 +39,13 @@ export const usePubSubClient = <Topics extends { [k: string]: any }>(topics: Top
             console.log('[pubsub] connection changed to', connectionState);
         });
 
-        console.log('[pubsub] subscribing...');
-
         const subscibtions = Object
             .entries(topics)
             .map(([topic, callback]) => {
-                return client
-                    .subscribe({ topics: topic })
+                console.log('[pubsub] subscribing to', topic);
+
+                return client!
+                    .subscribe({ topics: [topic] })
                     .subscribe({
                         next: (data) => {
                             console.log('[pubsub] message:', data);
@@ -60,7 +62,7 @@ export const usePubSubClient = <Topics extends { [k: string]: any }>(topics: Top
 
             unsubscribe();
         };
-    }, []);
+    }, [topics]);
 
     return [isConnected, publish] as const;
 };
