@@ -1,43 +1,82 @@
+import { LoginForm } from '@/components/LoginForm';
 import { getCurrentUser, fetchAuthSession, signIn, signOut, AuthUser } from '@aws-amplify/auth';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createContext, useContext, ComponentType } from 'react';
+
+const Context = createContext<{
+    user: AuthUser | null;
+    jwt: string | null;
+    signIn: (params: { username: string; password: string }) => Promise<void>;
+    signOut: () => Promise<void>;
+}>({
+    user: null,
+    jwt: null,
+    signIn: async () => { },
+    signOut: async () => { },
+});
 
 export const useAuth = () => {
-    const [user, setUser] = useState<AuthUser | null>(null);
-    const [jwt, setJwt] = useState<string | null>(null);
+    const context = useContext(Context);
 
-    const getAuthDetails = () => Promise.all([getCurrentUser(), fetchAuthSession()]);
-
-    useEffect(() => {
-        getAuthDetails()
-            .then(([user, session]) => {
-                setUser(user);
-                setJwt(session.tokens?.idToken?.toString() ?? null);
-            })
-            .catch((error: unknown) => {
-                console.log('[auth] error:', error);
-                setUser(null);
-                setJwt(null);
-            });
-    }, []);
-
-    const isAuthenticated = Boolean(user && jwt);
+    if (!context) {
+        throw Error('[auth] no context provider found');
+    }
 
     return {
-        user,
-        jwt,
-        isAuthenticated,
-        signIn: async (params: { username: string, password: string }) => {
-            await signIn(params);
-            const [user, session] = await getAuthDetails();
+        ...context,
+    };
+};
 
-            setUser(user);
-            setJwt(session.tokens?.idToken?.toString() ?? null);
-        },
-        signOut: async () => {
-            await signOut();
+export const withAuth = <P extends {}>(Wrapped: ComponentType<P>) => {
+    return (props: P) => {
+        const [user, setUser] = useState<AuthUser | null>(null);
+        const [jwt, setJwt] = useState<string | null>(null);
 
-            setUser(null);
-            setJwt(null);
-        },
+        const getAuthDetails = () => Promise.all([getCurrentUser(), fetchAuthSession()]);
+
+        useEffect(() => {
+            (async () => {
+                try {
+                    console.log('[auth] fetching auth details...');
+
+                    const [user, session] = await getAuthDetails();
+
+                    console.log('[auth] logged in');
+
+                    setUser(user);
+                    setJwt(session.tokens?.idToken?.toString() ?? null);
+                } catch (error: unknown) {
+                    console.log('[auth] error:', error);
+
+                    setUser(null);
+                    setJwt(null);
+                }
+            })();
+        }, []);
+
+        const isAuthenticated = Boolean(user && jwt);
+
+        const ctx = {
+            user,
+            jwt,
+            signIn: async (params: { username: string, password: string }) => {
+                await signIn(params);
+                const [user, session] = await getAuthDetails();
+
+                setUser(user);
+                setJwt(session.tokens?.idToken?.toString() ?? null);
+            },
+            signOut: async () => {
+                await signOut();
+
+                setUser(null);
+                setJwt(null);
+            },
+        };
+
+        return (
+            <Context.Provider value={ctx}>
+                {isAuthenticated ? <Wrapped {...props} /> : <LoginForm onSubmit={ctx.signIn} />}
+            </Context.Provider>
+        );
     };
 };
