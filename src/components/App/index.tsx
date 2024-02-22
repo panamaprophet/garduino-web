@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { ConfigurationForm } from '@/components/ConfigurationForm';
 import { StatePanel } from '@/components/StatePanel';
@@ -26,19 +26,28 @@ export const App = withAuth(() => {
     const rebootController = () => publish(`controllers/${controllerId}/reboot/sub`);
     const updateState = () => publish(`controllers/${controllerId}/status/sub`);
 
-    const onStatusMessage = (data: ControllerState) => setState({ ...state, ...data });
-    const onUpdateMessage = (data: Pick<ControllerState, 'temperature' | 'humidity'>) => setState({ ...state!, ...data });
+    const topics = useMemo(() => {
+        if (!controllerId) {
+            return {};
+        }
 
-    const [isConnected, publish] = usePubSubClient(controllerId ? {
-        [`controllers/${controllerId}/status/pub`]: onStatusMessage,
-        [`controllers/${controllerId}/events/pub`]: onUpdateMessage,
-    } : {});
+        return {
+            [`controllers/${controllerId}/status/pub`]: (data: ControllerState) => {
+                setState(state => ({ ...state, ...data }));
+            },
+            [`controllers/${controllerId}/events/pub`]: (data: Pick<ControllerState, 'temperature' | 'humidity'>) => {
+                setState(state => ({ ...state!, ...data }));
+            },
+        };
+    }, [controllerId]);
+
+    const [isConnected, publish] = usePubSubClient(topics);
 
     useEffect(() => {
-        if (isConnected && controllerId) {
+        if (isConnected) {
             updateState();
         }
-    }, [isConnected, controllerId]);
+    }, [isConnected]);
 
     useEffect(() => {
         if (locationHash && locationHash !== controllerId) {
