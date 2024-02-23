@@ -16,10 +16,12 @@ import { ControllerId, ControllerState } from '@/types';
 import { withAuth } from '@/hooks/useAuth';
 
 export const App = withAuth(() => {
+    const [locationHash, setLocationHash] = useLocationHash();
+
     const controllerIds = useControllerList();
 
-    const [locationHash, setLocationHash] = useLocationHash();
-    const [controllerId, setControllerId] = useState<ControllerId>(locationHash as ControllerId);
+    const controllerId = locationHash as ControllerId;
+
     const [configuration, setConfiguration, saveConfiguration] = useControllerConfiguration(controllerId);
     const [state, setState] = useState<ControllerState>();
 
@@ -49,23 +51,13 @@ export const App = withAuth(() => {
         }
     }, [isConnected]);
 
-    useEffect(() => {
-        if (locationHash && locationHash !== controllerId) {
-            setControllerId(locationHash as ControllerId);
-        }
-
-        if (controllerId && !locationHash) {
-            setLocationHash(controllerId);
-        }
-    }, [locationHash, controllerId]);
-
     return (
         <div className="p-4 max-w-md mx-auto text-sm">
             <Dropdown
                 title="Select controller"
                 value={controllerId}
                 options={controllerIds}
-                onChange={setControllerId}
+                onChange={setLocationHash}
             />
 
             <div className="border-b border-b-gray-200">
