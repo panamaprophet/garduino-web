@@ -7,6 +7,16 @@ const client = new PubSub({
     region: import.meta.env.VITE_REGION,
 });
 
+const isEmpty = <T extends object>(obj: T) => {
+    for (const prop in obj) {
+        if (Object.hasOwn(obj, prop)) {
+            return false;
+        }
+    }
+
+    return true;
+};
+
 export const usePubSubClient = <Topics extends { [k: string]: any }>(topics: Topics) => {
     const [isConnected, setConnected] = useState(false);
 
@@ -16,7 +26,12 @@ export const usePubSubClient = <Topics extends { [k: string]: any }>(topics: Top
         return client?.publish({ topics: topic, message });
     }, []);
 
-    useEffect(() => {      
+    useEffect(() => {
+        if (isEmpty(topics)) {
+            console.log('[pubsub] no topics to subscribe. terminating...');
+            return;
+        }
+
         console.log('[pubsub] subscribing to connection change...');
 
         const unsubscribe = Hub.listen('pubsub', ({ payload }: {
