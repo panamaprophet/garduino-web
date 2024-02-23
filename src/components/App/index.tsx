@@ -60,11 +60,13 @@ export const App = withAuth(() => {
                 onChange={setLocationHash}
             />
 
-            <div className="border-b border-b-gray-200">
-                {state && <StatePanel state={state} />}
+            {controllerId && (
+                <div className="border-b border-b-gray-200">
+                    {state && <StatePanel state={state} />}
 
-                {!state && <Loader status="Loading" />}
-            </div>
+                    {!state && <Loader status="Loading" />}
+                </div>
+            )}
 
             {configuration && (
                 <>

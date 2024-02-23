@@ -1,3 +1,4 @@
+import { Loader } from '@/components/Loader';
 import { LoginForm } from '@/components/LoginForm';
 import { getCurrentUser, fetchAuthSession, signIn, signOut, AuthUser } from '@aws-amplify/auth';
 import { useState, useEffect, createContext, useContext, ComponentType } from 'react';
@@ -30,6 +31,7 @@ export const withAuth = <P extends {}>(Wrapped: ComponentType<P>) => {
     return (props: P) => {
         const [user, setUser] = useState<AuthUser | null>(null);
         const [jwt, setJwt] = useState<string | null>(null);
+        const [isLoading, setLoading] = useState(true);
 
         const getAuthDetails = () => Promise.all([getCurrentUser(), fetchAuthSession()]);
 
@@ -50,6 +52,8 @@ export const withAuth = <P extends {}>(Wrapped: ComponentType<P>) => {
                     setUser(null);
                     setJwt(null);
                 }
+
+                setLoading(false);
             })();
         }, []);
 
@@ -72,6 +76,14 @@ export const withAuth = <P extends {}>(Wrapped: ComponentType<P>) => {
                 setJwt(null);
             },
         };
+
+        if (isLoading) {
+            return (
+                <div className="h-full flex items-center justify-center">
+                    <Loader status="Loading" />
+                </div>
+            );
+        }
 
         return (
             <Context.Provider value={ctx}>
