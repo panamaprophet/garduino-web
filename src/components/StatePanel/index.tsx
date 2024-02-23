@@ -2,7 +2,7 @@ import { Bulb, Drop, Fan, Temperature } from '@/components/Icon';
 import { ControllerState } from '@/types';
 
 
-export const StatePanel = ({ state }: { state: ControllerState }) => {
+export const StatePanel = ({ state, hasTemperatureWarning }: { state: ControllerState, hasTemperatureWarning?: boolean }) => {
     const isOn = 'isOn' in state ? (state.isOn ? 'On' : 'Off') : '-';
     const humidity = 'humidity' in state ? state.humidity : '-';
     const temperature = 'temperature' in state ? state.temperature : '-';
@@ -10,7 +10,7 @@ export const StatePanel = ({ state }: { state: ControllerState }) => {
 
     return (
         <div className="flex justify-between items-center p-4">
-            <div className="flex flex-col items-center">
+            <div className={`flex flex-col items-center ${state.isOn ? 'text-yellow-600' : ''}`}>
                 <Bulb /> {isOn}
             </div>
 
@@ -18,7 +18,7 @@ export const StatePanel = ({ state }: { state: ControllerState }) => {
                 <Drop /> {humidity} %
             </div>
 
-            <div className="flex flex-col items-center">
+            <div className={`flex flex-col items-center ${hasTemperatureWarning ? 'text-red-600' : ''}`}>
                 <Temperature /> {temperature} ℃
             </div>
 
