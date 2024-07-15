@@ -45,7 +45,7 @@ export const withAuth = <P extends {}>(Wrapped: ComponentType<P>) => {
                     console.log('[auth] logged in');
 
                     setUser(user);
-                    setJwt(session.tokens?.idToken?.toString() ?? null);
+                    setJwt(session.tokens?.accessToken?.toString() ?? null);
                 } catch (error: unknown) {
                     console.log('[auth] error:', error);
 
@@ -67,7 +67,7 @@ export const withAuth = <P extends {}>(Wrapped: ComponentType<P>) => {
                 const [user, session] = await getAuthDetails();
 
                 setUser(user);
-                setJwt(session.tokens?.idToken?.toString() ?? null);
+                setJwt(session.tokens?.accessToken?.toString() ?? null);
             },
             signOut: async () => {
                 await signOut();
