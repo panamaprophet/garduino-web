@@ -6,16 +6,15 @@ export default defineConfig({
     base: '/',
     plugins: [react()],
     root: 'src',
-    build: {
-        outDir: '../dist'
-    },
+    envDir: '../',
+    build: { outDir: '../dist' },
     resolve: {
         alias: [{
             find: '@',
             replacement: fileURLToPath(new URL('./src', import.meta.url)),
-          }]
+        }],
     },
     server: {
         open: true,
     },
-})
+});

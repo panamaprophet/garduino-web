@@ -1,18 +1,20 @@
+import { useState, useEffect, ComponentType, createContext, useContext } from 'react';
+import { getCurrentUser, fetchAuthSession, signIn, signOut, AuthUser } from '@aws-amplify/auth';
 import { Loader } from '@/components/Loader';
 import { LoginForm } from '@/components/LoginForm';
-import { getCurrentUser, fetchAuthSession, signIn, signOut, AuthUser } from '@aws-amplify/auth';
-import { useState, useEffect, createContext, useContext, ComponentType } from 'react';
 
-const Context = createContext<{
+interface AuthContext {
     user: AuthUser | null;
     jwt: string | null;
     signIn: (params: { username: string; password: string }) => Promise<void>;
     signOut: () => Promise<void>;
-}>({
+}
+
+export const Context = createContext<AuthContext>({
     user: null,
     jwt: null,
-    signIn: async () => { },
-    signOut: async () => { },
+    signIn: async () => {},
+    signOut: async () => {},
 });
 
 export const useAuth = () => {
@@ -33,16 +35,35 @@ export const withAuth = <P extends {}>(Wrapped: ComponentType<P>) => {
         const [jwt, setJwt] = useState<string | null>(null);
         const [isLoading, setLoading] = useState(true);
 
-        const getAuthDetails = () => Promise.all([getCurrentUser(), fetchAuthSession()]);
+        const isAuthenticated = Boolean(user && jwt);
+
+        const ctx = {
+            user,
+            jwt,
+            signIn: async (params: { username: string, password: string }) => {
+                await signIn(params);
+
+                const session = await fetchAuthSession();
+                const user = await getCurrentUser().catch(() => null);
+
+                setUser(user);
+                setJwt(session.tokens?.accessToken?.toString() ?? null);
+            },
+            signOut: async () => {
+                await signOut();
+
+                setUser(null);
+                setJwt(null);
+            },
+        };
 
         useEffect(() => {
             (async () => {
                 try {
                     console.log('[auth] fetching auth details...');
 
-                    const [user, session] = await getAuthDetails();
-
-                    console.log('[auth] logged in');
+                    const session = await fetchAuthSession();
+                    const user = await getCurrentUser().catch(() => null);
 
                     setUser(user);
                     setJwt(session.tokens?.accessToken?.toString() ?? null);
@@ -56,26 +77,6 @@ export const withAuth = <P extends {}>(Wrapped: ComponentType<P>) => {
                 setLoading(false);
             })();
         }, []);
-
-        const isAuthenticated = Boolean(user && jwt);
-
-        const ctx = {
-            user,
-            jwt,
-            signIn: async (params: { username: string, password: string }) => {
-                await signIn(params);
-                const [user, session] = await getAuthDetails();
-
-                setUser(user);
-                setJwt(session.tokens?.accessToken?.toString() ?? null);
-            },
-            signOut: async () => {
-                await signOut();
-
-                setUser(null);
-                setJwt(null);
-            },
-        };
 
         if (isLoading) {
             return (

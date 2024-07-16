@@ -7,10 +7,11 @@ interface Props<T,> {
     onChange?: (value: T) => void;
     readOnly?: boolean;
     placeholder?: string;
+    autoComplete?: string;
 }
 
 
-export const Input = <T extends string | number>({ type = 'text', value, onChange, readOnly = false, placeholder }: Props<T>) => (
+export const Input = <T extends string | number>({ type = 'text', value, onChange, readOnly = false, placeholder, autoComplete }: Props<T>) => (
     <input
         type={type}
         className={inputClassList}
@@ -18,6 +19,7 @@ export const Input = <T extends string | number>({ type = 'text', value, onChang
         readOnly={readOnly}
         placeholder={placeholder}
         onChange={event => onChange && onChange(event.target.value as T)}
+        autoComplete={autoComplete}
     />
 );
 

@@ -7,14 +7,12 @@ export const LoginForm = ({ onSubmit }: { onSubmit: (credentials: { username: st
     const [state, setState] = useState({ username: '', password: '' });
 
     return (
-        <form
-            onSubmit={event => event.preventDefault()}
-            className="flex flex-col gap-4 p-4 max-w-md mx-auto justify-center h-full"
-        >
+        <form className="flex flex-col gap-4 p-4 max-w-md mx-auto justify-center h-full">
             <Input
                 value={state.username}
                 onChange={username => setState({ ...state, username })}
                 placeholder="e-mail"
+                autoComplete="email"
             />
 
             <Input
@@ -22,9 +20,15 @@ export const LoginForm = ({ onSubmit }: { onSubmit: (credentials: { username: st
                 onChange={password => setState({ ...state, password })}
                 placeholder="password"
                 type="password"
+                autoComplete="current-password"
             />
 
-            <Button onClick={() => onSubmit(state)}>Login</Button>
+            <Button type="submit" onClick={(event) => {
+                event.preventDefault();
+                onSubmit(state);
+            }}>
+                Login
+            </Button>
         </form>
     )
 };
