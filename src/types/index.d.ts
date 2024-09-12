@@ -1,8 +1,5 @@
 import { UUID } from 'crypto';
 
-
-export type ControllerId = UUID;
-
 export type Time = `${number}:${number}`;
 
 export interface ControllerState {
@@ -14,7 +11,7 @@ export interface ControllerState {
 }
 
 export interface ControllerConfiguration {
-    controllerId: ControllerId;
+    controllerId: UUID;
     onTime: Time;
     duration: number;
     fanSpeed: number;

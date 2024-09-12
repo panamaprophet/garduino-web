@@ -1,19 +1,15 @@
 import { useEffect, useState } from 'react';
-import { ControllerId } from '@/types';
+import { UUID } from 'crypto';
+import { getControllerHistoricalData } from '@/services/data-collector';
 
-const getControllerHistoricalData = (controllerId: ControllerId, { startDate, endDate }: { startDate: number, endDate: number }) => {
-    const url = `${import.meta.env.VITE_API_URL}/data/${controllerId}?startDate=${startDate}&endDate=${endDate}`;
+export const useControllerHistoricalData = (
+    controllerId: UUID,
+    options: Partial<{ startDate: number; endDate: number }>
+) => {
+    const [data, setData] = useState<unknown>([]);
 
-    return fetch(url).then(response => response.json());
-};
-
-export const useControllerHistoricalData = (controllerId: ControllerId, options: { startDate?: number, endDate?: number } = {}) => {
-    const {
-        startDate = Date.now() - 24 * 60 * 60 * 1000,
-        endDate = Date.now(),
-    } = options;
-
-    const [data, setData] = useState<any>([]);
+    const startDate = options.startDate ?? Date.now() - 24 * 60 * 60 * 1000;
+    const endDate = options.endDate ?? Date.now();
 
     useEffect(() => {
         getControllerHistoricalData(controllerId, { startDate, endDate }).then(setData);

@@ -1,7 +1,7 @@
 import { useState, useEffect, ComponentType, createContext, useContext } from 'react';
-import { getCurrentUser, fetchAuthSession, signIn, signOut, AuthUser } from '@aws-amplify/auth';
 import { Loader } from '@/components/Loader';
 import { LoginForm } from '@/components/LoginForm';
+import { AuthUser, fetchAuthSession, getCurrentUser, signIn, signOut } from '@/services/auth';
 
 interface AuthContext {
     user: AuthUser | null;

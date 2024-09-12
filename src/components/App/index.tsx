@@ -11,22 +11,16 @@ import { usePubSubClient } from '@/hooks/usePubSubClient';
 import { useLocationHash } from '@/hooks/useLocationHash';
 import { useControllerList } from '@/hooks/useControllerList';
 import { useControllerConfiguration } from '@/hooks/useControllerConfiguration';
-
-import { ControllerId, ControllerState } from '@/types';
 import { withAuth } from '@/hooks/useAuth';
 
+import { ControllerState } from '@/types';
+import { UUID } from 'crypto';
+
 export const App = withAuth(() => {
-    const [locationHash, setLocationHash] = useLocationHash();
+    const [controllerId, setLocationHash] = useLocationHash();
     const [controllerIds, refetchControllerIds] = useControllerList();
 
-    const controllerId = locationHash as ControllerId;
-
-    const [
-        configuration, 
-        setConfiguration, 
-        saveConfiguration, 
-        createConfiguration,
-    ] = useControllerConfiguration(controllerId);
+    const { state: configuration, create, update } = useControllerConfiguration(controllerId as UUID);
 
     const [state, setState] = useState<ControllerState>();
 
@@ -39,11 +33,14 @@ export const App = withAuth(() => {
         }
 
         return {
-            [`controllers/${controllerId}/status/pub`]: (data: ControllerState) => {
-                setState(state => ({ ...state, ...data }));
+            [`controllers/${controllerId}/status/pub`]: (data: { [k: string]: unknown }) => {
+                const changes = data as unknown as ControllerState;
+
+                setState(state => ({ ...state, ...changes }));
             },
-            [`controllers/${controllerId}/events/pub`]: (data: Pick<ControllerState, 'temperature' | 'humidity'>) => {
-                setState(state => ({ ...state!, ...data }));
+            [`controllers/${controllerId}/events/pub`]: (data: { [k: string]: unknown }) => {
+                const changes = data as unknown as Pick<ControllerState, 'temperature' | 'humidity'>
+                setState(state => ({ ...state!, ...changes }));
             },
         };
     }, [controllerId]);
@@ -59,7 +56,7 @@ export const App = withAuth(() => {
     const hasTemperatureWarning = Boolean(state && configuration && (state.temperature > configuration.thresholdTemperature));
 
     const onCreateController = async () => {
-        await createConfiguration();
+        await create();
         await refetchControllerIds();
     };
 
@@ -85,7 +82,7 @@ export const App = withAuth(() => {
 
             {configuration && (
                 <>
-                    <ConfigurationForm state={configuration} onChange={setConfiguration} />
+                    <ConfigurationForm state={configuration} onChange={update} />
 
                     <hr className="my-2.5" />
 
@@ -97,10 +94,6 @@ export const App = withAuth(() => {
                         <div className="flex gap-2">
                             <Button onClick={updateState} disabled={!isConnected}>
                                 <Arrows />
-                            </Button>
-
-                            <Button onClick={saveConfiguration}>
-                                Save
                             </Button>
                         </div>
                     </div>

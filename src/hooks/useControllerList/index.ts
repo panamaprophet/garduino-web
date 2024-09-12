@@ -1,26 +1,13 @@
-import { useEffect, useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { ControllerId } from '@/types';
+import { useState } from 'react';
+import { UUID } from 'crypto';
+import { getControllerIds } from '@/services/configuration';
 
 export const useControllerList = () => {
-    const [state, setState] = useState<ControllerId[]>([]);
-    const { jwt } = useAuth();
+    const [state, setState] = useState<UUID[]>([]);
 
-    const refetch = () => {
-        fetch(`${import.meta.env.VITE_API_URL}/configurations`, {
-            headers: {
-                Authorization: `Bearer ${jwt}`,
-            },
-        }).then(response => response.json()).then(setState);
-    };
+    const fetcher = () => getControllerIds().then(setState);
 
-    useEffect(() => {
-        if (!jwt) {
-            return;
-        }
+    fetcher();
 
-        refetch();
-    }, [jwt]);
-
-    return [state, refetch] as const;
+    return [state, fetcher] as const;
 };
