@@ -17,12 +17,17 @@ import { withAuth } from '@/hooks/useAuth';
 
 export const App = withAuth(() => {
     const [locationHash, setLocationHash] = useLocationHash();
-
-    const controllerIds = useControllerList();
+    const [controllerIds, refetchControllerIds] = useControllerList();
 
     const controllerId = locationHash as ControllerId;
 
-    const [configuration, setConfiguration, saveConfiguration] = useControllerConfiguration(controllerId);
+    const [
+        configuration, 
+        setConfiguration, 
+        saveConfiguration, 
+        createConfiguration,
+    ] = useControllerConfiguration(controllerId);
+
     const [state, setState] = useState<ControllerState>();
 
     const rebootController = () => publish(`controllers/${controllerId}/reboot/sub`);
@@ -53,14 +58,22 @@ export const App = withAuth(() => {
 
     const hasTemperatureWarning = Boolean(state && configuration && (state.temperature > configuration.thresholdTemperature));
 
+    const onCreateController = async () => {
+        await createConfiguration();
+        await refetchControllerIds();
+    };
+
     return (
         <div className="p-4 max-w-md mx-auto text-sm">
-            <Dropdown
-                title="Select controller"
-                value={controllerId}
-                options={controllerIds}
-                onChange={setLocationHash}
-            />
+            <div className="flex gap-2">
+                <Dropdown
+                    title="Select controller"
+                    value={controllerId}
+                    options={controllerIds}
+                    onChange={setLocationHash}
+                />
+                <Button onClick={onCreateController}>+</Button>
+            </div>
 
             {controllerId && (
                 <div className="border-b border-b-gray-200">

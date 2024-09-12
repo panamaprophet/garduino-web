@@ -3,7 +3,7 @@ const selectClassList = 'block bg-gray-50 border border-gray-300 text-gray-900 t
 
 export const Dropdown = <T extends string>({ title, options, value, onChange }: { title: string, options: T[], value: T | undefined, onChange: (id: T) => void }) => {
     return (
-        <div className={`relative ${arrowClassList}`}>
+        <div className={`relative ${arrowClassList} grow`}>
             <select
                 className={selectClassList}
                 value={value}
