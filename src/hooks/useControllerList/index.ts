@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { UUID } from 'crypto';
 import { getControllerIds } from '@/services/configuration';
 
@@ -7,7 +7,9 @@ export const useControllerList = () => {
 
     const fetcher = () => getControllerIds().then(setState);
 
-    fetcher();
+    useEffect(() => {
+        fetcher();
+    }, []);
 
     return [state, fetcher] as const;
 };

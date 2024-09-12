@@ -13,7 +13,7 @@ import { useControllerList } from '@/hooks/useControllerList';
 import { useControllerConfiguration } from '@/hooks/useControllerConfiguration';
 import { withAuth } from '@/hooks/useAuth';
 
-import { ControllerState } from '@/types';
+import { ControllerConfiguration, ControllerState } from '@/types';
 import { UUID } from 'crypto';
 
 export const App = withAuth(() => {
@@ -23,9 +23,7 @@ export const App = withAuth(() => {
     const { state: configuration, create, update } = useControllerConfiguration(controllerId as UUID);
 
     const [state, setState] = useState<ControllerState>();
-
-    const rebootController = () => publish(`controllers/${controllerId}/reboot/sub`);
-    const updateState = () => publish(`controllers/${controllerId}/status/sub`);
+    const [draft, setDraft] = useState<ControllerConfiguration>();
 
     const topics = useMemo(() => {
         if (!controllerId) {
@@ -35,7 +33,6 @@ export const App = withAuth(() => {
         return {
             [`controllers/${controllerId}/status/pub`]: (data: { [k: string]: unknown }) => {
                 const changes = data as unknown as ControllerState;
-
                 setState(state => ({ ...state, ...changes }));
             },
             [`controllers/${controllerId}/events/pub`]: (data: { [k: string]: unknown }) => {
@@ -46,6 +43,9 @@ export const App = withAuth(() => {
     }, [controllerId]);
 
     const [isConnected, publish] = usePubSubClient(topics);
+
+    const rebootController = () => publish(`controllers/${controllerId}/reboot/sub`);
+    const updateState = () => publish(`controllers/${controllerId}/status/sub`);
 
     useEffect(() => {
         if (isConnected) {
@@ -75,14 +75,13 @@ export const App = withAuth(() => {
             {controllerId && (
                 <div className="border-b border-b-gray-200">
                     {state && <StatePanel state={state} hasTemperatureWarning={hasTemperatureWarning} />}
-
                     {!state && <Loader status="Loading" />}
                 </div>
             )}
 
             {configuration && (
                 <>
-                    <ConfigurationForm state={configuration} onChange={update} />
+                    <ConfigurationForm state={draft ?? configuration} onChange={setDraft} />
 
                     <hr className="my-2.5" />
 
@@ -94,6 +93,10 @@ export const App = withAuth(() => {
                         <div className="flex gap-2">
                             <Button onClick={updateState} disabled={!isConnected}>
                                 <Arrows />
+                            </Button>
+
+                            <Button onClick={() => update(draft ?? configuration)}>
+                                Save
                             </Button>
                         </div>
                     </div>

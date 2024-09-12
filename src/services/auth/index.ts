@@ -15,7 +15,7 @@ export {
     fetchAuthSession, 
     signIn, 
     signOut, 
-    AuthUser,
+    type AuthUser,
 } from '@aws-amplify/auth';
 
 export const getAccessToken = async () => {

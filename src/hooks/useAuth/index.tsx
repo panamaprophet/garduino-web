@@ -1,7 +1,7 @@
 import { useState, useEffect, ComponentType, createContext, useContext } from 'react';
+import { AuthUser, getAccessToken, getCurrentUser, signIn, signOut } from '@/services/auth';
 import { Loader } from '@/components/Loader';
 import { LoginForm } from '@/components/LoginForm';
-import { AuthUser, fetchAuthSession, getCurrentUser, signIn, signOut } from '@/services/auth';
 
 interface AuthContext {
     user: AuthUser | null;
@@ -43,11 +43,11 @@ export const withAuth = <P extends {}>(Wrapped: ComponentType<P>) => {
             signIn: async (params: { username: string, password: string }) => {
                 await signIn(params);
 
-                const session = await fetchAuthSession();
+                const accessToken = await getAccessToken();
                 const user = await getCurrentUser().catch(() => null);
 
                 setUser(user);
-                setJwt(session.tokens?.accessToken?.toString() ?? null);
+                setJwt(accessToken ?? null);
             },
             signOut: async () => {
                 await signOut();
@@ -62,11 +62,11 @@ export const withAuth = <P extends {}>(Wrapped: ComponentType<P>) => {
                 try {
                     console.log('[auth] fetching auth details...');
 
-                    const session = await fetchAuthSession();
+                    const accessToken = await getAccessToken();
                     const user = await getCurrentUser().catch(() => null);
 
                     setUser(user);
-                    setJwt(session.tokens?.accessToken?.toString() ?? null);
+                    setJwt(accessToken ?? null);
                 } catch (error: unknown) {
                     console.log('[auth] error:', error);
 
