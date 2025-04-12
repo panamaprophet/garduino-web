@@ -1,3 +1,13 @@
+amplify/team-provider-info.json
+.parcel-cache/
+src/config.ts
+src/aws-exports.ts
+amplify/backend/hosting/S3AndCloudFront/template.json
+amplify/backend/hosting/S3AndCloudFront/parameters.json
+
+.env.*
+.env
+
 #amplify-do-not-edit-begin
 amplify/\#current-cloud-backend
 amplify/.config/local-*
@@ -19,13 +29,3 @@ amplifytools.xcconfig
 .secret-*
 **.sample
 #amplify-do-not-edit-end
-
-amplify/team-provider-info.json
-.parcel-cache/
-src/config.ts
-src/aws-exports.ts
-amplify/backend/hosting/S3AndCloudFront/template.json
-amplify/backend/hosting/S3AndCloudFront/parameters.json
-
-.env.*
-.env
