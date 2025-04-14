@@ -2,17 +2,17 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { queries } from '@/entities/configuration';
-import { ControllerState } from '@/entities/state';
+import { ControllerStatus } from '@/entities/status';
 
 import { Loader } from '@/shared/ui/Loader';
 import { Bulb, Drop, Fan, Temperature } from '@/shared/ui/Icon';
 
 import { usePubSubClient } from '@/shared/pubsub';
 
-export const StatePanel = ({ controllerId }: { controllerId: string }) => {
+export const StatusPanel = ({ controllerId }: { controllerId: string }) => {
     const { data: configuration } = useQuery(queries.getConfiguration(controllerId));
 
-    const [state, setState] = useState<ControllerState>();
+    const [status, setStatus] = useState<ControllerStatus>();
     const [isLoading, setLoading] = useState(false);
 
     const updateState = () => {
@@ -22,22 +22,22 @@ export const StatePanel = ({ controllerId }: { controllerId: string }) => {
 
     const topics = {
         [`controllers/${controllerId}/status/pub`]: (data: { [k: string]: unknown }) => {
-            const changes = data as unknown as ControllerState;
-            setState(state => ({ ...state, ...changes, lastUpdateOn: Date.now() }));
+            const changes = data as unknown as ControllerStatus;
+            setStatus(status => ({ ...status, ...changes, lastUpdateOn: Date.now() }));
             setLoading(false);
         },
         [`controllers/${controllerId}/events/pub`]: (data: { [k: string]: unknown }) => {
-            const changes = data as unknown as Pick<ControllerState, 'temperature' | 'humidity'>
-            setState(state => ({ ...state!, ...changes, lastUpdateOn: Date.now() }));
+            const changes = data as unknown as Pick<ControllerStatus, 'temperature' | 'humidity'>
+            setStatus(status => ({ ...status!, ...changes, lastUpdateOn: Date.now() }));
             setLoading(false);
         },
     };
 
     const [, publish] = usePubSubClient(topics, { onConnect: updateState });
 
-    const hasTemperatureWarning = Boolean(state && configuration && (state.temperature > configuration.thresholdTemperature));
+    const hasTemperatureWarning = Boolean(status && configuration && (status.temperature > configuration.thresholdTemperature));
 
-    if (!state || isLoading) {
+    if (!status || isLoading) {
         return (
             <div className="flex justify-between items-center p-7 cursor-pointer" onClick={updateState}>
                 <Loader status="Loading" />
@@ -45,14 +45,14 @@ export const StatePanel = ({ controllerId }: { controllerId: string }) => {
         );
     }
 
-    const isOn = 'isOn' in state ? (state.isOn ? 'On' : 'Off') : '-';
-    const humidity = 'humidity' in state ? state.humidity : '-';
-    const temperature = 'temperature' in state ? state.temperature : '-';
-    const fanSpeed = 'fanSpeed' in state ? (state.fanSpeed / 255 * 100).toFixed() : '-';
+    const isOn = 'isOn' in status ? (status.isOn ? 'On' : 'Off') : '-';
+    const humidity = 'humidity' in status ? status.humidity : '-';
+    const temperature = 'temperature' in status ? status.temperature : '-';
+    const fanSpeed = 'fanSpeed' in status ? (status.fanSpeed / 255 * 100).toFixed() : '-';
 
     return (
         <div className="flex justify-between items-center p-4 cursor-pointer group relative" onClick={updateState}>
-            <div className={`flex flex-col items-center ${state.isOn ? 'text-yellow-600' : ''}`}>
+            <div className={`flex flex-col items-center ${status.isOn ? 'text-yellow-600' : ''}`}>
                 <Bulb /> {isOn}
             </div>
 

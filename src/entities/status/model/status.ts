@@ -1,4 +1,4 @@
-export interface State {
+export interface Status {
     temperature: number;
     humidity: number;
     isOn: boolean;

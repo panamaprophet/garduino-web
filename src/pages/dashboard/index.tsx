@@ -1,5 +1,5 @@
 import { ControllerList, EditControllerConfigurationForm, AddControllerButton, RebootControllerButton } from '@/features/controller-configuration';
-import { ControllerStatePanel } from '@/features/controller-state';
+import { ControllerStatusPanel } from '@/features/controller-state';
 import { withAuth } from '@/shared/auth';
 
 import { useLocationHash } from './lib/useLocationHash';
@@ -17,7 +17,7 @@ export const Dashboard = withAuth(() => {
 
             {controllerId && (
                 <>
-                    <ControllerStatePanel controllerId={controllerId} />
+                    <ControllerStatusPanel controllerId={controllerId} />
 
                     <hr />
 
