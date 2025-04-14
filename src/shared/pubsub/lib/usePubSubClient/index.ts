@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { PubSubContent } from '@aws-amplify/pubsub/dist/esm/types/PubSub';
-import { publish, subscribe, subscribeToConnectionChange } from '@/features/pubsub/api';
+import { publish, subscribe, subscribeToConnectionChange } from '../../api';
 
 interface Params {
     [topic: string]: (data: PubSubContent) => void;

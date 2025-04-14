@@ -1,33 +1,9 @@
-import { useState, useEffect, ComponentType, createContext, useContext } from 'react';
-import { AuthUser, getAccessToken, getCurrentUser, signIn, signOut } from '@/features/auth/api';
-import { Loader } from '@/shared/ui/Loader';
-import { LoginForm } from '@/features/auth/ui/LoginForm';
-
-interface AuthContext {
-    user: AuthUser | null;
-    jwt: string | null;
-    signIn: (params: { username: string; password: string }) => Promise<void>;
-    signOut: () => Promise<void>;
-}
-
-export const Context = createContext<AuthContext>({
-    user: null,
-    jwt: null,
-    signIn: async () => {},
-    signOut: async () => {},
-});
-
-export const useAuth = () => {
-    const context = useContext(Context);
-
-    if (!context) {
-        throw Error('[auth] no context provider found');
-    }
-
-    return {
-        ...context,
-    };
-};
+import { Loader } from "@/shared/ui/Loader";
+import { AuthUser, signIn, getCurrentUser, signOut } from "@aws-amplify/auth";
+import { ComponentType, useState, useEffect } from "react";
+import { getAccessToken } from "../api";
+import { LoginForm } from "../ui/LoginForm";
+import { Context } from "./context";
 
 export const withAuth = <P extends {}>(Wrapped: ComponentType<P>) => {
     return (props: P) => {

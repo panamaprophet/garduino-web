@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Input } from '@/shared/ui/Input';
 import { Button } from '@/shared/ui/Button';
+import { Loader } from '@/shared/ui/Loader';
 
 
-export const LoginForm = ({ onSubmit }: { onSubmit: (credentials: { username: string, password: string }) => void }) => {
+export const LoginForm = ({ onSubmit }: { onSubmit: (credentials: { username: string, password: string }) => Promise<void> }) => {
     const [state, setState] = useState({ username: '', password: '' });
+    const [isLoading, setLoading] = useState(false);
 
     return (
         <form className="flex flex-col gap-4 p-4 max-w-md mx-auto justify-center h-full">
@@ -23,11 +25,19 @@ export const LoginForm = ({ onSubmit }: { onSubmit: (credentials: { username: st
                 autoComplete="current-password"
             />
 
-            <Button type="submit" onClick={(event) => {
+            <Button type="submit" onClick={async (event) => {
                 event.preventDefault();
-                onSubmit(state);
+
+                try {
+                    setLoading(true); await onSubmit(state);
+                } catch (error) {
+                    console.log('[auth] error during sign in:', error);
+
+                    setLoading(false);
+                }
             }}>
-                Login
+                {isLoading && <Loader status="Sign In" />}
+                {!isLoading && 'Sign In'}
             </Button>
         </form>
     )

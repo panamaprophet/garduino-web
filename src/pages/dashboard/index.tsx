@@ -1,12 +1,10 @@
-
-
-import { ControllerList, ControllerConfigurationForm, AddControllerButton, RebootButton } from '@/features/controller-configuration';
-import { ControllerStatePanel, GetStateButton } from '@/features/controller-state';
-import { withAuth } from '@/features/auth';
+import { ControllerList, EditControllerConfigurationForm, AddControllerButton, RebootControllerButton } from '@/features/controller-configuration';
+import { ControllerStatePanel } from '@/features/controller-state';
+import { withAuth } from '@/shared/auth';
 
 import { useLocationHash } from './lib/useLocationHash';
 
-export const App = withAuth(() => {
+export const Dashboard = withAuth(() => {
     const [controllerId, setLocationHash] = useLocationHash();
 
     return (
@@ -23,14 +21,12 @@ export const App = withAuth(() => {
 
                     <hr />
 
-                    <ControllerConfigurationForm controllerId={controllerId} />
+                    <EditControllerConfigurationForm controllerId={controllerId} />
 
                     <hr className="my-2.5" />
 
                     <div className="flex gap-2 justify-between pt-4">
-                        <RebootButton controllerId={controllerId} />
-
-                        <GetStateButton controllerId={controllerId} />
+                        <RebootControllerButton controllerId={controllerId} />
                     </div>
                 </>
             )}

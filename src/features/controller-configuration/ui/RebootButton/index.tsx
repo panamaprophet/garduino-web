@@ -1,4 +1,4 @@
-import { usePubSubClient } from "@/features/pubsub";
+import { usePubSubClient } from "@/shared/pubsub";
 import { Button } from "@/shared/ui/Button";
 
 export const RebootButton = ({ controllerId }: { controllerId: string }) => {
@@ -7,7 +7,7 @@ export const RebootButton = ({ controllerId }: { controllerId: string }) => {
     const onClick = () => publish(`controllers/${controllerId}/reboot/sub`);
 
     return (
-        <Button onClick={onClick} disabled={!isConnected}>
+        <Button width="full" onClick={onClick} disabled={!isConnected}>
             Reboot
         </Button>
     )

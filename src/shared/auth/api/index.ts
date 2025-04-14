@@ -12,12 +12,11 @@ Amplify.configure({
     },
 });
 
-export { 
-    getCurrentUser, 
-    fetchAuthSession, 
-    signIn, 
-    signOut, 
-    type AuthUser,
+export {
+    getCurrentUser,
+    fetchAuthSession,
+    signIn,
+    signOut,
 } from '@aws-amplify/auth';
 
 export const getAccessToken = async () => {

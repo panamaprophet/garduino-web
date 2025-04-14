@@ -18,15 +18,17 @@ import {
 
 import { queries, updateConfiguration } from '@/entities/configuration';
 
-export const ConfigurationForm = ({ controllerId }: { controllerId: string }) => {
-    const { data: state, refetch } = useQuery(queries.getConfiguration(controllerId));
+export const EditForm = ({ controllerId }: { controllerId: string }) => {
+    const { data, refetch } = useQuery(queries.getConfiguration(controllerId));
     const { mutateAsync: update } = useMutation({ mutationFn: updateConfiguration });
 
-    const [draft, setDraft] = useState<typeof state>();
+    const [draft, setDraft] = useState<typeof data>();
 
-    if (!state) {
+    if (!data) {
         return <Loader status="Loading" />;
     }
+
+    const state = draft || data;
 
     const durationTime = millisecondsToTime(state.duration);
     const fanSpeedPercentage = Math.trunc((state.fanSpeed / 255) * 100);

@@ -1,5 +1,5 @@
 import { sendRequest } from '@/shared/api/client';
-import { Configuration } from '@/entities/configuration/model/configuration';
+import { ControllerConfiguration } from '@/entities/configuration';
 
 export const getControllerIds = () => {
     return sendRequest<string[]>('/v1/controllers');
@@ -8,10 +8,10 @@ export const getControllerIds = () => {
 export const getConfiguration = (controllerId: string) => {
     const searchParams = new URLSearchParams({ raw: 'true' });
 
-    return sendRequest<Configuration>(`/v1/controllers/${controllerId}?${searchParams}`);
+    return sendRequest<ControllerConfiguration>(`/v1/controllers/${controllerId}?${searchParams}`);
 };
 
-export const updateConfiguration = ({ controllerId, ...configuration }: Configuration) => {
+export const updateConfiguration = ({ controllerId, ...configuration }: ControllerConfiguration) => {
     return sendRequest<{}>(`/v1/controllers/${controllerId}`, {
         body: JSON.stringify(configuration),
         method: 'PUT',
@@ -28,6 +28,6 @@ export const createConfiguration = () => {
             privateKey: string;
             publicKey: string;
         },
-        configuration: Configuration;
+        configuration: ControllerConfiguration;
     }>('/v1/controllers', { method: 'POST' });
 };

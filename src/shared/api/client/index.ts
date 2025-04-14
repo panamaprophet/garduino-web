@@ -1,4 +1,4 @@
-import { getAccessToken } from '@/features/auth/api';
+import { getAccessToken } from '@/shared/auth';
 
 export const sendRequest = async <TResult>(path: string, options?: {
     method: 'POST' | 'GET' | 'PUT',

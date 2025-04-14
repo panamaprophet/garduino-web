@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createConfiguration } from "@/entities/configuration";
 
 // @todo: return config with certs and so on in cb on create
-export const AddControllerButton = () => {
+export const AddButton = () => {
     const { mutateAsync: create } = useMutation({ mutationFn: createConfiguration });
     const queryClient = useQueryClient();
 
