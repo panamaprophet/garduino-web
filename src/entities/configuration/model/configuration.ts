@@ -1,9 +1,8 @@
 import { UUID } from 'crypto';
-import { Time } from '@/shared/lib/date';
 
 export interface Configuration {
     controllerId: UUID;
-    onTime: Time;
+    onTime: string;
     duration: number;
     fanSpeed: number;
     thresholdTemperature: number;

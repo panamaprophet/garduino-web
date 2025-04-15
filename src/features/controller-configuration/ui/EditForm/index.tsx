@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { ClockRange } from 'clock-range';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { Label } from '@/shared/ui/Label';
@@ -7,16 +6,27 @@ import { Button } from '@/shared/ui/Button';
 import { Loader } from '@/shared/ui/Loader';
 import { Input, InputRange } from '@/shared/ui/Input';
 
-import {
-    addDays,
-    getTimeRangeInHours,
-    hoursToTime,
-    millisecondsToTime,
-    Time,
-    timeToMilliseconds,
-} from '@/shared/lib/date';
+import { millisecondsToTime, timeToMilliseconds } from '@/shared/lib/date';
 
 import { queries, updateConfiguration } from '@/entities/configuration';
+import { CircularSlider } from '../CircularSlider';
+
+const timeToAngle = (timeStr: string) => {
+    const [hours, minutes] = timeStr.split(":").map(Number);
+
+    if (typeof hours !== 'number' || typeof minutes !== 'number') {
+        return 0;
+    }
+
+    return ((hours + minutes / 60) / 24) * 360
+}
+
+const angleToTime = (angle: number) => {
+    const totalHours = (angle / 360) * 24
+    const hours = Math.floor(totalHours)
+    const minutes = Math.floor((totalHours - hours) * 60)
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`
+}
 
 export const EditForm = ({ controllerId }: { controllerId: string }) => {
     const { data, refetch } = useQuery(queries.getConfiguration(controllerId));
@@ -32,20 +42,6 @@ export const EditForm = ({ controllerId }: { controllerId: string }) => {
 
     const durationTime = millisecondsToTime(state.duration);
     const fanSpeedPercentage = Math.trunc((state.fanSpeed / 255) * 100);
-    const [startTime, endTime] = getTimeRangeInHours(state.onTime, state.duration);
-
-    const setOnTime = ([start, end]: [number, number]) => {
-        const on = new Date(`01/01/2024 ${hoursToTime(start)}`);
-        const off = new Date(`01/01/2024 ${hoursToTime(end)}`);
-
-        const duration = off > on
-            ? off.valueOf() - on.valueOf()
-            : addDays(off, 1).valueOf() - on.valueOf();
-
-        const onTime = `${on.getHours()}:${on.getMinutes()}` as Time;
-
-        setDraft({ ...state, onTime, duration });
-    };
 
     const _onSubmit = async () => {
         if (!draft) {
@@ -57,16 +53,35 @@ export const EditForm = ({ controllerId }: { controllerId: string }) => {
         refetch();
     };
 
+    const handleCycleChange = (start: number, end: number) => {
+        const onTime = angleToTime(start);
+        const offTime = angleToTime(end);
+
+        let duration = timeToMilliseconds(offTime) - timeToMilliseconds(onTime);
+
+        if (duration < 0) {
+            const dayInMilliseconds = 24 * 60 * 60 * 1000;
+
+            duration += dayInMilliseconds;
+        }
+
+        setDraft({ ...state, onTime, duration })
+    };
+
     return (
         <div>
-            <div className="w-72 h-72 p-4 mx-auto">
-                <ClockRange range={[startTime, endTime]} onChange={setOnTime} />
+            <div className="w-4xl h-4xl mx-auto">
+                <CircularSlider
+                    startAngle={timeToAngle(state.onTime)}
+                    endAngle={timeToAngle(millisecondsToTime(timeToMilliseconds(state.onTime) + state.duration)) % 360}
+                    onChange={handleCycleChange}
+                />
             </div>
 
             <div className="flex gap-4 justify-between">
                 <Label className="w-1/2">
                     On time:
-                    <Input type="time" value={hoursToTime(startTime)} onChange={onTime => setDraft({ ...state, onTime })} />
+                    <Input type="time" value={state.onTime} onChange={onTime => setDraft({ ...state, onTime })} />
                 </Label>
 
                 <Label className="w-1/2">
@@ -87,7 +102,7 @@ export const EditForm = ({ controllerId }: { controllerId: string }) => {
                 </Label>
             </div>
 
-            <div className="flex gap-4 justify-between mb-7">
+            <div className="flex gap-4 justify-between">
                 <Button width="full" onClick={_onSubmit}>
                     Save
                 </Button>

@@ -1,1 +1,1 @@
-export type { Status as ControllerStatus } from './model/state';
+export type { Status as ControllerStatus } from './model/status';

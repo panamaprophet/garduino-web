@@ -1,2 +1,2 @@
 
-export { StatusPanel as ControllerStatusPanel } from './ui/StatePanel';
+export { StatusPanel as ControllerStatusPanel } from './ui/StatusPanel';

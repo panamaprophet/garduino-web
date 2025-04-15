@@ -1,6 +1,7 @@
 import { Button } from "@/shared/ui/Button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createConfiguration } from "@/entities/configuration";
+import { PlusIcon } from "lucide-react";
 
 // @todo: return config with certs and so on in cb on create
 export const AddButton = () => {
@@ -13,6 +14,8 @@ export const AddButton = () => {
     };
 
     return (
-        <Button onClick={onCreateController}>+</Button>
+        <Button theme="neutral" onClick={onCreateController}>
+            <PlusIcon />
+        </Button>
     );
 }

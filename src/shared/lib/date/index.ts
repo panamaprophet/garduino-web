@@ -1,4 +1,4 @@
-export type Time = `${number}:${number}`;
+export type Time = string;
 
 export const timeToHHmmArray = (time: Time) => time.split(':').map(Number) as [hours: number, minutes: number];
 

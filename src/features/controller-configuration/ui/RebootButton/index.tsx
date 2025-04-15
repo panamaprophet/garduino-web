@@ -7,7 +7,7 @@ export const RebootButton = ({ controllerId }: { controllerId: string }) => {
     const onClick = () => publish(`controllers/${controllerId}/reboot/sub`);
 
     return (
-        <Button width="full" onClick={onClick} disabled={!isConnected}>
+        <Button width="full" theme="warning" onClick={onClick} disabled={!isConnected}>
             Reboot
         </Button>
     )

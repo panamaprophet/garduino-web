@@ -51,26 +51,26 @@ export const StatusPanel = ({ controllerId }: { controllerId: string }) => {
     const fanSpeed = 'fanSpeed' in status ? (status.fanSpeed / 255 * 100).toFixed() : '-';
 
     return (
-        <div className="flex justify-between items-center p-4 cursor-pointer group relative" onClick={updateState}>
-            <div className={`flex flex-col items-center ${status.isOn ? 'text-yellow-600' : ''}`}>
-                <Bulb /> {isOn}
+        <div className="flex justify-between items-center gap-2 py-4 cursor-pointer group relative" onClick={updateState}>
+            <div className={`flex flex-col border p-3 flex-grow shadow gap-1 rounded-lg items-center ${status.isOn ? 'ring-2 ring-offset-2 ring-[rgba(245,158,11,0.8)] text-[rgba(245,158,11,0.8)]' : ''}`}>
+                <Bulb /> 
+                <span className="text-black font-medium">{isOn}</span>
             </div>
 
-            <div className="flex flex-col items-center">
-                <Drop /> {humidity}%
+            <div className="flex flex-col items-center border p-3 flex-grow shadow gap-1 rounded-lg">
+                <Drop /> 
+                <span className="text-black font-medium">{humidity}%</span>
             </div>
 
-            <div className={`flex flex-col items-center ${hasTemperatureWarning ? 'text-red-600' : ''}`}>
-                <Temperature /> {temperature}℃
+            <div className={`flex flex-col border p-3 flex-grow shadow gap-1 rounded-lg items-center ${hasTemperatureWarning ? 'text-red-600' : ''}`}>
+                <Temperature /> 
+                <span className="text-black font-medium">{temperature}℃</span>
             </div>
 
-            <div className="flex flex-col items-center">
-                <Fan /> {fanSpeed}%
+            <div className="flex flex-col border p-3 flex-grow shadow gap-1 rounded-lg items-center">
+                <Fan /> 
+                <span className="text-black font-medium">{fanSpeed}%</span>
             </div>
-
-            {/* <div className="absolute opacity-0 group-hover:opacity-100 transition-all flex w-full h-full items-center justify-center bg-white/90">
-                Refresh
-            </div> */}
         </div>
     );
 };
