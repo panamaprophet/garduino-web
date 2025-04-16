@@ -1,6 +1,11 @@
-import { ControllerList, EditControllerConfigurationForm, AddControllerButton, RebootControllerButton } from '@/features/controller-configuration';
-import { ControllerStatusPanel } from '@/features/controller-status';
 import { withAuth } from '@/shared/auth';
+
+import { ControllerStatus } from '@/features/controller-status';
+
+import { ControllerList } from '@/features/controller-configuration/list';
+import { ControllerEditForm } from '@/features/controller-configuration/edit';
+import { ControllerAddButton } from '@/features/controller-configuration/add';
+import { ControllerRebootButton } from '@/features/controller-configuration/reboot';
 
 import { useLocationHash } from './lib/useLocationHash';
 
@@ -12,14 +17,14 @@ export const Dashboard = withAuth(() => {
             <div className="flex flex-col gap-4">
                 <div className="flex gap-2">
                     <ControllerList selectedId={controllerId} onSelect={setLocationHash} />
-                    <AddControllerButton />
+                    <ControllerAddButton />
                 </div>
 
                 {controllerId && (
                     <>
-                        <ControllerStatusPanel controllerId={controllerId} />
-                        <EditControllerConfigurationForm controllerId={controllerId} />
-                        <RebootControllerButton controllerId={controllerId} />
+                        <ControllerStatus controllerId={controllerId} />
+                        <ControllerEditForm controllerId={controllerId} />
+                        <ControllerRebootButton controllerId={controllerId} />
                     </>
                 )}
             </div>

@@ -7,9 +7,11 @@ export const RebootButton = ({ controllerId }: { controllerId: string }) => {
     const onClick = () => {
         const isConfirmed = confirm('Reboot the controller?');
 
-        if (isConfirmed) {
-            publish(`controllers/${controllerId}/reboot/sub`);
+        if (!isConfirmed) {
+            return;
         }
+
+        publish(`controllers/${controllerId}/reboot/sub`);
     };
 
     return (
