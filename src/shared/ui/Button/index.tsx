@@ -1,6 +1,6 @@
 import { MouseEventHandler, ReactNode } from 'react';
 
-const buttonClassList = 'transition-all cursor-pointer text-slate-900 border-slate-300 border rounded-lg py-2 px-3 text-sm';
+const buttonClassList = 'transition-all cursor-pointer text-slate-900 border-slate-300 border rounded-lg p-2.5 text-sm';
 
 const ButtonWidth = {
     full: 'w-full',
