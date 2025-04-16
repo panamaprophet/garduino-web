@@ -1,6 +1,6 @@
 import { HTMLInputTypeAttribute } from 'react';
 
-const inputClassList = 'bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 appearance-none text-left';
+const inputClassList = 'bg-slate-100 text-slate-800 text-sm inset-shadow-xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 appearance-none text-left font-normal';
 
 
 interface Props<T,> {

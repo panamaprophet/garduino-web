@@ -23,11 +23,13 @@ export const StatusPanel = ({ controllerId }: { controllerId: string }) => {
     const topics = {
         [`controllers/${controllerId}/status/pub`]: (data: { [k: string]: unknown }) => {
             const changes = data as unknown as ControllerStatus;
+
             setStatus(status => ({ ...status, ...changes, lastUpdateOn: Date.now() }));
             setLoading(false);
         },
         [`controllers/${controllerId}/events/pub`]: (data: { [k: string]: unknown }) => {
-            const changes = data as unknown as Pick<ControllerStatus, 'temperature' | 'humidity'>
+            const changes = data as unknown as Pick<ControllerStatus, 'temperature' | 'humidity' | 'isOn'>
+
             setStatus(status => ({ ...status!, ...changes, lastUpdateOn: Date.now() }));
             setLoading(false);
         },
@@ -40,7 +42,7 @@ export const StatusPanel = ({ controllerId }: { controllerId: string }) => {
     if (!status || isLoading) {
         return (
             <div className="flex justify-between items-center p-7 cursor-pointer" onClick={updateState}>
-                <Loader status="Loading" />
+                <Loader status="Loading status" />
             </div>
         );
     }
@@ -51,8 +53,8 @@ export const StatusPanel = ({ controllerId }: { controllerId: string }) => {
     const fanSpeed = 'fanSpeed' in status ? (status.fanSpeed / 255 * 100).toFixed() : '-';
 
     return (
-        <div className="flex justify-between items-center gap-2 py-4 cursor-pointer group relative" onClick={updateState}>
-            <div className={`flex flex-col border p-3 flex-grow shadow gap-1 rounded-lg items-center ${status.isOn ? 'ring-2 ring-offset-2 ring-[rgba(245,158,11,0.8)] text-[rgba(245,158,11,0.8)]' : ''}`}>
+        <div className="flex justify-between items-center gap-2 cursor-pointer group relative" onClick={updateState}>
+            <div className={`flex flex-col border p-3 flex-grow shadow gap-1 rounded-lg items-center ${status.isOn ? 'ring-2 ring-offset-2 ring-amber-500 text-amber-500' : ''}`}>
                 <Bulb /> 
                 <span className="text-black font-medium">{isOn}</span>
             </div>
@@ -62,7 +64,7 @@ export const StatusPanel = ({ controllerId }: { controllerId: string }) => {
                 <span className="text-black font-medium">{humidity}%</span>
             </div>
 
-            <div className={`flex flex-col border p-3 flex-grow shadow gap-1 rounded-lg items-center ${hasTemperatureWarning ? 'text-red-600' : ''}`}>
+            <div className={`flex flex-col border p-3 flex-grow shadow gap-1 rounded-lg items-center ${hasTemperatureWarning ? 'ring-2 ring-offset-2 ring-orange-600 text-orange-600' : ''}`}>
                 <Temperature /> 
                 <span className="text-black font-medium">{temperature}℃</span>
             </div>

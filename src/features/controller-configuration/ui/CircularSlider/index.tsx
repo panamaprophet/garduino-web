@@ -1,10 +1,10 @@
-import { hoursToTime } from '@/shared/lib/date';
 import { useRef, useEffect, useState } from 'react';
+import { hoursToTime, millisecondsToTime, timeToMilliseconds } from '@/shared/lib/date';
 
-interface CircularSliderProps {
-    startAngle: number
-    endAngle: number
-    onChange: (start: number, end: number) => void
+interface Props {
+    onTime: string;
+    duration: number;
+    onChange: (onTime: string, duration: number) => void;
 }
 
 const snapAngleToHour = (angle: number) => {
@@ -15,20 +15,16 @@ const snapAngleToHour = (angle: number) => {
     return snappedAngle % 360;
 };
 
-const getAngleFromEvent = (e: MouseEvent | TouchEvent, canvas: HTMLCanvasElement) => {
-    const rect = canvas.getBoundingClientRect()
-    const centerX = rect.width / 2
-    const centerY = rect.height / 2
+const getAngleFromEvent = (event: MouseEvent | TouchEvent, canvas: HTMLCanvasElement) => {
+    const rect = canvas.getBoundingClientRect();
 
-    let clientX, clientY
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
 
-    if ("touches" in e) {
-        clientX = e.touches[0]?.clientX
-        clientY = e.touches[0]?.clientY
-    } else {
-        clientX = e.clientX
-        clientY = e.clientY
-    }
+    const isTouch = 'touches' in event;
+
+    const clientX = isTouch ? event.touches[0]?.clientX : event.clientX;
+    const clientY = isTouch ? event.touches[0]?.clientY : event.clientY;
 
     if (!clientX || !clientY) {
         console.log('unable to calculate the coordinates', { clientX, clientY });
@@ -54,12 +50,48 @@ const angleToCoords = (angle: number, radius: number, centerX: number, centerY: 
     }
 }
 
-export function CircularSlider({ startAngle, endAngle, onChange }: CircularSliderProps) {
-    const canvasRef = useRef<HTMLCanvasElement>(null)
-    const [dragging, setDragging] = useState<'start' | 'end' | null>(null)
-    const [angles, setAngles] = useState({ start: startAngle, end: endAngle })
+const timeToAngle = (timeStr: string) => {
+    const [hours, minutes] = timeStr.split(":").map(Number);
 
-    // const angles = { start: startAngle, end: endAngle };
+    if (typeof hours !== 'number' || typeof minutes !== 'number') {
+        return 0;
+    }
+
+    return ((hours + minutes / 60) / 24) * 360
+}
+
+const angleToTime = (angle: number) => {
+    const totalHours = (angle / 360) * 24;
+    const hours = Math.floor(totalHours);
+    const minutes = Math.floor((totalHours - hours) * 60);
+
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+}
+
+const getClosestHandle = (angle: number, angles: { start: number; end: number }) => {
+    const startDiff = Math.min(
+        Math.abs(angle - angles.start),
+        Math.abs(angle - angles.start + 360),
+        Math.abs(angle - angles.start - 360),
+    );
+
+    const endDiff = Math.min(
+        Math.abs(angle - angles.end),
+        Math.abs(angle - angles.end + 360),
+        Math.abs(angle - angles.end - 360),
+    );
+
+    return startDiff < endDiff ? 'start' : 'end';
+}
+
+
+export function CircularSlider({ onTime, duration, onChange }: Props) {
+    const startAngle = timeToAngle(onTime);
+    const endAngle = timeToAngle(millisecondsToTime(timeToMilliseconds(onTime) + duration)) % 360;
+
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [dragging, setDragging] = useState<'start' | 'end' | null>(null);
+    const [angles, setAngles] = useState({ start: startAngle, end: endAngle });
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -177,31 +209,18 @@ export function CircularSlider({ startAngle, endAngle, onChange }: CircularSlide
         ctx.fillText("Light Cycle", centerX, centerY + 15)
     }, [angles])
 
-    // Handle mouse/touch events
     useEffect(() => {
         const canvas = canvasRef.current;
 
-        if (!canvas) return
-
-        const getClosestHandle = (angle: number) => {
-            const startDiff = Math.min(
-                Math.abs(angle - angles.start),
-                Math.abs(angle - angles.start + 360),
-                Math.abs(angle - angles.start - 360),
-            )
-
-            const endDiff = Math.min(
-                Math.abs(angle - angles.end),
-                Math.abs(angle - angles.end + 360),
-                Math.abs(angle - angles.end - 360),
-            )
-
-            return startDiff < endDiff ? "start" : "end"
+        if (!canvas) {
+            return;
         }
 
-        const handleMouseDown = (e: MouseEvent | TouchEvent) => {
-            const angle = getAngleFromEvent(e, canvas)
-            setDragging(getClosestHandle(angle))
+        const handleMouseDown = (event: MouseEvent | TouchEvent) => {
+            const angle = getAngleFromEvent(event, canvas);
+            const closestHandle = getClosestHandle(angle, angles);
+
+            setDragging(closestHandle);
         }
 
         const handleMouseMove = (e: MouseEvent | TouchEvent) => {
@@ -215,26 +234,44 @@ export function CircularSlider({ startAngle, endAngle, onChange }: CircularSlide
         }
 
         const handleMouseUp = () => {
-            if (dragging) {
-                onChange(angles.start, angles.end)
-                setDragging(null)
+            if (!dragging) {
+                return;
             }
+
+            const onTime = angleToTime(angles.start);
+            const offTime = angleToTime(angles.end);
+
+            let duration = timeToMilliseconds(offTime) - timeToMilliseconds(onTime);
+
+            if (duration < 0) {
+                const dayInMilliseconds = 24 * 60 * 60 * 1000;
+
+                duration += dayInMilliseconds;
+            }
+
+            onChange(onTime, duration);
+
+            setDragging(null);
         }
 
-        canvas.addEventListener("mousedown", handleMouseDown)
-        canvas.addEventListener("touchstart", handleMouseDown, { passive: true })
-        window.addEventListener("mousemove", handleMouseMove)
-        window.addEventListener("touchmove", handleMouseMove, { passive: true })
-        window.addEventListener("mouseup", handleMouseUp)
-        window.addEventListener("touchend", handleMouseUp)
+        canvas.addEventListener('mousedown', handleMouseDown);
+        canvas.addEventListener('touchstart', handleMouseDown, { passive: true });
+
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('touchmove', handleMouseMove, { passive: true });
+
+        window.addEventListener('mouseup', handleMouseUp);
+        window.addEventListener('touchend', handleMouseUp);
 
         return () => {
-            canvas.removeEventListener("mousedown", handleMouseDown)
-            canvas.removeEventListener("touchstart", handleMouseDown)
-            window.removeEventListener("mousemove", handleMouseMove)
-            window.removeEventListener("touchmove", handleMouseMove)
-            window.removeEventListener("mouseup", handleMouseUp)
-            window.removeEventListener("touchend", handleMouseUp)
+            canvas.removeEventListener('mousedown', handleMouseDown);
+            canvas.removeEventListener('touchstart', handleMouseDown);
+
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('touchmove', handleMouseMove);
+
+            window.removeEventListener('mouseup', handleMouseUp);
+            window.removeEventListener('touchend', handleMouseUp);
         }
     }, [dragging, angles, onChange])
 
@@ -249,7 +286,7 @@ export function CircularSlider({ startAngle, endAngle, onChange }: CircularSlide
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div className="flex flex-col items-center">
                         <div className="flex gap-2 items-center">
-                            <div className="h-1 w-16 bg-[rgba(245,158,11,0.8)] rounded-full" />
+                            <div className="h-1 w-16 bg-amber-500 rounded-full" />
                         </div>
                     </div>
                 </div>

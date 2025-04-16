@@ -1,6 +1,6 @@
 import { MouseEventHandler, ReactNode } from 'react';
 
-const buttonClassList = 'transition-all cursor-pointer text-slate-900 border-slate-300 border rounded-lg p-2.5 text-sm';
+const buttonClassList = 'transition-all cursor-pointer border-none rounded-lg p-2.5 text-sm font-medium';
 
 const ButtonWidth = {
     full: 'w-full',
@@ -8,9 +8,9 @@ const ButtonWidth = {
 };
 
 const ButtonTheme = {
-    default: 'bg-emerald-500 hover:bg-emerald-600 text-white border-none',
-    warning: 'bg-red-500 hover:bg-red-600 text-white border-none',
-    neutral: 'bg-slate-100 hover:bg-slate-200 border-none',
+    default: 'bg-emerald-500 hover:bg-emerald-600 text-white',
+    warning: 'bg-orange-500 hover:bg-orange-600 text-white',
+    neutral: 'bg-slate-100 hover:bg-slate-200 text-slate-800',
 
 }
 

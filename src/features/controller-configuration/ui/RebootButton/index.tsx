@@ -16,5 +16,5 @@ export const RebootButton = ({ controllerId }: { controllerId: string }) => {
         <Button width="full" theme="warning" onClick={onClick} disabled={!isConnected}>
             Reboot
         </Button>
-    )
+    );
 }

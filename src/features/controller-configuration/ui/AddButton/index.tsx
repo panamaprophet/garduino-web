@@ -14,8 +14,10 @@ export const AddButton = () => {
     };
 
     return (
+        <div className="aspect-square">
         <Button theme="neutral" onClick={onCreateController}>
             <PlusIcon className="w-4 h-4 text-black"/>
         </Button>
+        </div>
     );
 }

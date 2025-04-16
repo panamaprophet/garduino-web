@@ -11,23 +11,6 @@ import { millisecondsToTime, timeToMilliseconds } from '@/shared/lib/date';
 import { queries, updateConfiguration } from '@/entities/configuration';
 import { CircularSlider } from '../CircularSlider';
 
-const timeToAngle = (timeStr: string) => {
-    const [hours, minutes] = timeStr.split(":").map(Number);
-
-    if (typeof hours !== 'number' || typeof minutes !== 'number') {
-        return 0;
-    }
-
-    return ((hours + minutes / 60) / 24) * 360
-}
-
-const angleToTime = (angle: number) => {
-    const totalHours = (angle / 360) * 24
-    const hours = Math.floor(totalHours)
-    const minutes = Math.floor((totalHours - hours) * 60)
-    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`
-}
-
 export const EditForm = ({ controllerId }: { controllerId: string }) => {
     const { data, refetch } = useQuery(queries.getConfiguration(controllerId));
     const { mutateAsync: update } = useMutation({ mutationFn: updateConfiguration });
@@ -35,7 +18,11 @@ export const EditForm = ({ controllerId }: { controllerId: string }) => {
     const [draft, setDraft] = useState<typeof data>();
 
     if (!data) {
-        return <Loader status="Loading" />;
+        return (
+            <div className="flex justify-between items-center p-7">
+                <Loader status="Loading configuration" />
+            </div>
+        );
     }
 
     const state = draft || data;
@@ -53,28 +40,13 @@ export const EditForm = ({ controllerId }: { controllerId: string }) => {
         refetch();
     };
 
-    const handleCycleChange = (start: number, end: number) => {
-        const onTime = angleToTime(start);
-        const offTime = angleToTime(end);
-
-        let duration = timeToMilliseconds(offTime) - timeToMilliseconds(onTime);
-
-        if (duration < 0) {
-            const dayInMilliseconds = 24 * 60 * 60 * 1000;
-
-            duration += dayInMilliseconds;
-        }
-
-        setDraft({ ...state, onTime, duration })
-    };
-
     return (
-        <div>
+        <div className="flex flex-col gap-4">
             <div className="w-4xl h-4xl mx-auto">
                 <CircularSlider
-                    startAngle={timeToAngle(state.onTime)}
-                    endAngle={timeToAngle(millisecondsToTime(timeToMilliseconds(state.onTime) + state.duration)) % 360}
-                    onChange={handleCycleChange}
+                    onTime={state.onTime}
+                    duration={state.duration}
+                    onChange={(onTime, duration) => setDraft({ ...state, onTime, duration })}
                 />
             </div>
 
@@ -90,19 +62,30 @@ export const EditForm = ({ controllerId }: { controllerId: string }) => {
                 </Label>
             </div>
 
-            <div className="flex gap-4 justify-between">
-                <Label className="w-1/2">
-                    Threshold T: {state.thresholdTemperature}℃:
+            <div className="flex flex-col gap-4 justify-between">
+                <Label>
+                    <div className="flex justify-between">
+                        Temperature Threshold:
+                        <span>
+                            {state.thresholdTemperature}℃
+                        </span>
+                    </div>
+
                     <InputRange value={state.thresholdTemperature} onChange={value => setDraft({ ...state, thresholdTemperature: Math.round(value) })} />
                 </Label>
 
-                <Label className="w-1/2">
-                    Fan speed: {fanSpeedPercentage}%
+                <Label>
+                    <div className="flex justify-between">
+                        Fan Speed:
+                        <span>
+                            {fanSpeedPercentage}%
+                        </span>
+                    </div>
                     <InputRange value={fanSpeedPercentage} onChange={fanSpeed => setDraft({ ...state, fanSpeed: Math.round(fanSpeed * 2.55) })} />
                 </Label>
             </div>
 
-            <div className="flex gap-4 justify-between">
+            <div className="flex justify-between mt-1">
                 <Button width="full" onClick={_onSubmit}>
                     Save
                 </Button>

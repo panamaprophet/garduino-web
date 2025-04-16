@@ -7,7 +7,7 @@ export const ControllerList = ({ selectedId, onSelect }: { selectedId?: string; 
 
     return (
         <Dropdown
-            title="Select controller"
+            title="Select Controller"
             value={selectedId}
             options={controllerIds}
             onChange={onSelect}
