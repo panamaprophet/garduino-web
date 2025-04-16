@@ -15,7 +15,7 @@ export const AddButton = () => {
 
     return (
         <Button theme="neutral" onClick={onCreateController}>
-            <PlusIcon />
+            <PlusIcon className="w-4 h-4 text-black"/>
         </Button>
     );
 }

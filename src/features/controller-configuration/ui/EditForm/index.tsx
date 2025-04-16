@@ -80,7 +80,7 @@ export const EditForm = ({ controllerId }: { controllerId: string }) => {
 
             <div className="flex gap-4 justify-between">
                 <Label className="w-1/2">
-                    On time:
+                    On Time:
                     <Input type="time" value={state.onTime} onChange={onTime => setDraft({ ...state, onTime })} />
                 </Label>
 
