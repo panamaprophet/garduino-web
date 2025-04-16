@@ -13,7 +13,7 @@ export const RebootButton = ({ controllerId }: { controllerId: string }) => {
     };
 
     return (
-        <Button width="full" theme="warning" onClick={onClick} disabled={!isConnected}>
+        <Button width="full" theme="secondary" onClick={onClick} disabled={!isConnected}>
             Reboot
         </Button>
     );

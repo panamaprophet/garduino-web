@@ -54,22 +54,22 @@ export const StatusPanel = ({ controllerId }: { controllerId: string }) => {
 
     return (
         <div className="flex justify-between items-center gap-2 cursor-pointer group relative" onClick={updateState}>
-            <div className={`flex flex-col border p-3 flex-grow shadow gap-1 rounded-lg items-center ${status.isOn ? 'ring-2 ring-offset-2 ring-amber-500 text-amber-500' : ''}`}>
+            <div className={`flex flex-col border p-3 grow shadow-xs gap-1 rounded-lg items-center ${status.isOn ? 'ring-2 ring-offset-2 ring-amber-500 text-amber-500' : ''}`}>
                 <Bulb /> 
                 <span className="text-black font-medium">{isOn}</span>
             </div>
 
-            <div className="flex flex-col items-center border p-3 flex-grow shadow gap-1 rounded-lg">
+            <div className="flex flex-col items-center border p-3 grow shadow-xs gap-1 rounded-lg">
                 <Drop /> 
                 <span className="text-black font-medium">{humidity}%</span>
             </div>
 
-            <div className={`flex flex-col border p-3 flex-grow shadow gap-1 rounded-lg items-center ${hasTemperatureWarning ? 'ring-2 ring-offset-2 ring-orange-600 text-orange-600' : ''}`}>
+            <div className={`flex flex-col border p-3 grow shadow-xs gap-1 rounded-lg items-center ${hasTemperatureWarning ? 'ring-2 ring-offset-2 ring-orange-600 text-orange-600' : ''}`}>
                 <Temperature /> 
                 <span className="text-black font-medium">{temperature}℃</span>
             </div>
 
-            <div className="flex flex-col border p-3 flex-grow shadow gap-1 rounded-lg items-center">
+            <div className="flex flex-col border p-3 grow shadow-xs gap-1 rounded-lg items-center">
                 <Fan /> 
                 <span className="text-black font-medium">{fanSpeed}%</span>
             </div>

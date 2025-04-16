@@ -19,12 +19,13 @@
         "deploy": "amplify publish -c"
     },
     "devDependencies": {
+        "@tailwindcss/postcss": "^4.1.4",
         "@types/node": "^20.11.19",
         "@types/react": "^18.2.55",
         "@types/react-dom": "^18.2.19",
         "clock-range": "latest",
         "date-fns": "^3.3.1",
         "postcss": "^8.4.35",
-        "tailwindcss": "^3.4.1"
+        "tailwindcss": "^4.1.4"
     }
 }

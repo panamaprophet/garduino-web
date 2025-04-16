@@ -42,7 +42,7 @@ export const EditForm = ({ controllerId }: { controllerId: string }) => {
 
     return (
         <div className="flex flex-col gap-4">
-            <div className="w-4xl h-4xl mx-auto">
+            <div className="w-full h-full mx-auto">
                 <CircularSlider
                     onTime={state.onTime}
                     duration={state.duration}

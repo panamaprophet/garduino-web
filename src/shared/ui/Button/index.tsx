@@ -8,11 +8,9 @@ const ButtonWidth = {
 };
 
 const ButtonTheme = {
-    default: 'bg-emerald-500 hover:bg-emerald-600 text-white',
-    warning: 'bg-orange-500 hover:bg-orange-600 text-white',
-    neutral: 'bg-slate-100 hover:bg-slate-200 text-slate-800',
-
-}
+    primary: 'bg-emerald-500 hover:bg-emerald-600 text-white',
+    secondary: 'bg-slate-100 hover:bg-slate-200 text-slate-800',
+};
 
 interface Props { 
     children: ReactNode;
@@ -23,7 +21,7 @@ interface Props {
     onClick: MouseEventHandler<HTMLButtonElement>;
 }
 
-export const Button = ({ children, onClick, disabled, width = 'auto', type = 'button', theme = 'default' }: Props) => (
+export const Button = ({ children, onClick, disabled, width = 'auto', type = 'button', theme = 'primary' }: Props) => (
     <button
         type={type}
         onClick={onClick}
