@@ -1,89 +1,17 @@
 import { useRef, useEffect, useState } from 'react';
 import { hoursToTime, millisecondsToTime, timeToMilliseconds } from '@/shared/lib/date';
 
+import { angleToCoords } from './lib/angleToCoords';
+import { angleToTime } from './lib/angleToTime';
+import { getAngleFromEvent } from './lib/getAngleFromEvent';
+import { getClosestHandle } from './lib/getClosestHandle';
+import { timeToAngle } from './lib/timeToAngle';
+
 interface Props {
     onTime: string;
     duration: number;
     onChange: (onTime: string, duration: number) => void;
 }
-
-const snapAngleToHour = (angle: number) => {
-    const hourAngle = 15; // each hour is 360 / 24 = 15 degrees
-
-    const snappedAngle = Math.round(angle / hourAngle) * hourAngle;
-
-    return snappedAngle % 360;
-};
-
-const getAngleFromEvent = (event: MouseEvent | TouchEvent, canvas: HTMLCanvasElement) => {
-    const rect = canvas.getBoundingClientRect();
-
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-
-    const isTouch = 'touches' in event;
-
-    const clientX = isTouch ? event.touches[0]?.clientX : event.clientX;
-    const clientY = isTouch ? event.touches[0]?.clientY : event.clientY;
-
-    if (!clientX || !clientY) {
-        console.log('unable to calculate the coordinates', { clientX, clientY });
-        return 0;
-    }
-
-    const x = clientX - rect.left - centerX
-    const y = clientY - rect.top - centerY
-
-    let angle = Math.atan2(y, x) * (180 / Math.PI) + 90
-    if (angle < 0) angle += 360
-
-    // return angle
-    return snapAngleToHour(angle);
-}
-
-const angleToCoords = (angle: number, radius: number, centerX: number, centerY: number) => {
-    const radians = (angle - 90) * (Math.PI / 180);
-
-    return {
-        x: centerX + radius * Math.cos(radians),
-        y: centerY + radius * Math.sin(radians),
-    }
-}
-
-const timeToAngle = (timeStr: string) => {
-    const [hours, minutes] = timeStr.split(":").map(Number);
-
-    if (typeof hours !== 'number' || typeof minutes !== 'number') {
-        return 0;
-    }
-
-    return ((hours + minutes / 60) / 24) * 360
-}
-
-const angleToTime = (angle: number) => {
-    const totalHours = (angle / 360) * 24;
-    const hours = Math.floor(totalHours);
-    const minutes = Math.floor((totalHours - hours) * 60);
-
-    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
-}
-
-const getClosestHandle = (angle: number, angles: { start: number; end: number }) => {
-    const startDiff = Math.min(
-        Math.abs(angle - angles.start),
-        Math.abs(angle - angles.start + 360),
-        Math.abs(angle - angles.start - 360),
-    );
-
-    const endDiff = Math.min(
-        Math.abs(angle - angles.end),
-        Math.abs(angle - angles.end + 360),
-        Math.abs(angle - angles.end - 360),
-    );
-
-    return startDiff < endDiff ? 'start' : 'end';
-}
-
 
 export function CircularSlider({ onTime, duration, onChange }: Props) {
     const startAngle = timeToAngle(onTime);
