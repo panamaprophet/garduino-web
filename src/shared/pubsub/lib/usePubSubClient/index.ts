@@ -9,6 +9,8 @@ interface Params {
 export const usePubSubClient = (topics: Params = {}, options?: { onConnect: () => void }) => {
     const [isConnected, setConnected] = useState(false);
 
+    const hashKey = Object.keys(topics).sort().join('::');
+
     useEffect(() => {
         console.log('[pubsub] subscribing to connection change...');
 
@@ -21,6 +23,7 @@ export const usePubSubClient = (topics: Params = {}, options?: { onConnect: () =
                 options?.onConnect();
             }
         });
+
         const subscibtions = Object.entries(topics).map(([topic, callback]) => subscribe(topic, callback));
 
         return () => {
@@ -30,7 +33,7 @@ export const usePubSubClient = (topics: Params = {}, options?: { onConnect: () =
 
             unsubscribe();
         };
-    }, [topics]);
+    }, [hashKey]);
 
     return [isConnected, publish] as const;
 };
