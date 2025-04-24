@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { queries } from '@/entities/configuration';
 import { ControllerStatus } from '@/entities/status';
 
+import { Card } from '@/shared/ui/Card';
 import { Loader } from '@/shared/ui/Loader';
 import { Bulb, Drop, Fan, Temperature } from '@/shared/ui/Icon';
 
@@ -54,25 +55,25 @@ export const StatusPanel = ({ controllerId }: { controllerId: string }) => {
 
     return (
         <div className="flex justify-between items-center gap-2 pt-0.5 cursor-pointer group relative" onClick={updateState}>
-            <div className={`flex flex-col border p-3 grow shadow-xs gap-1 rounded-lg items-center ${status.isOn ? 'ring-2 ring-offset-2 ring-amber-500 text-amber-500' : ''}`}>
-                <Bulb /> 
+            <Card className={status.isOn ? 'ring-2 ring-offset-2 ring-amber-500 text-amber-500' : ''}>
+                <Bulb />
                 <span className="text-black font-medium">{isOn}</span>
-            </div>
+            </Card>
 
-            <div className="flex flex-col border p-3 grow shadow-xs gap-1 rounded-lg items-center">
-                <Drop /> 
+            <Card>
+                <Drop />
                 <span className="text-black font-medium">{humidity}%</span>
-            </div>
+            </Card>
 
-            <div className={`flex flex-col border p-3 grow shadow-xs gap-1 rounded-lg items-center ${hasTemperatureWarning ? 'ring-2 ring-offset-2 ring-orange-600 text-orange-600' : ''}`}>
-                <Temperature /> 
+            <Card className={hasTemperatureWarning ? 'ring-2 ring-offset-2 ring-orange-600 text-orange-600' : ''}>
+                <Temperature />
                 <span className="text-black font-medium">{temperature}℃</span>
-            </div>
+            </Card>
 
-            <div className="flex flex-col border p-3 grow shadow-xs gap-1 rounded-lg items-center">
-                <Fan /> 
+            <Card>
+                <Fan />
                 <span className="text-black font-medium">{fanSpeed}%</span>
-            </div>
+            </Card>
         </div>
     );
 };

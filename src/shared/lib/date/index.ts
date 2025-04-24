@@ -13,7 +13,7 @@ export const timeToMilliseconds = (time: Time) => {
 };
 
 export const millisecondsToTime = (duration: number) => {
-    const hours = millisecondsToHours(duration) % 24;
+    const hours = millisecondsToHours(duration);
     const minutes = (hours % 1 * 60) % 60;
 
     return [hours, minutes]
