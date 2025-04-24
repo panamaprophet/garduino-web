@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { Label } from '@/shared/ui/Label';
-import { Button } from '@/shared/ui/Button';
 import { Loader } from '@/shared/ui/Loader';
+import { Button } from '@/shared/ui/Button';
 import { Input, InputRange } from '@/shared/ui/Input';
+import { LightCyclePicker } from '@/shared/ui/LightCyclePicker';
 
 import { millisecondsToTime, timeToMilliseconds } from '@/shared/lib/date';
 
 import { queries, updateConfiguration } from '@/entities/configuration';
-import { CircularSlider } from '../CircularSlider';
 
 export const EditForm = ({ controllerId }: { controllerId: string }) => {
     const { data, refetch } = useQuery(queries.getConfiguration(controllerId));
@@ -43,7 +43,7 @@ export const EditForm = ({ controllerId }: { controllerId: string }) => {
     return (
         <div className="flex flex-col gap-4">
             <div className="w-full h-full mx-auto">
-                <CircularSlider
+                <LightCyclePicker
                     onTime={state.onTime}
                     duration={state.duration}
                     onChange={(onTime, duration) => setDraft({ ...state, onTime, duration })}
@@ -58,7 +58,7 @@ export const EditForm = ({ controllerId }: { controllerId: string }) => {
 
                 <Label className="w-1/2">
                     Duration:
-                    <Input type="time" value={durationTime} onChange={value => setDraft({ ...state, duration: timeToMilliseconds(value) })} />
+                    <Input type="text" value={durationTime} onChange={value => setDraft({ ...state, duration: timeToMilliseconds(value) })} />
                 </Label>
             </div>
 

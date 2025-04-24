@@ -18,9 +18,12 @@ const getCoordinatesFromEvent = (event: MouseEvent | TouchEvent) => {
     return { x, y };
 };
 
-export function CircularSlider({ onTime, duration, onChange }: Props) {
+export const LightCyclePicker = ({ onTime, duration, onChange }: Props) => {
     const startAngle = timeToAngle(onTime);
     const endAngle = timeToAngle(millisecondsToTime(timeToMilliseconds(onTime) + duration)) % 360;
+
+    const dayInMilliseconds = 24 * 60 * 60 * 1000;
+    const isFullCycle = duration === dayInMilliseconds;
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const handleRef = useRef<'start' | 'end' | null>(null);
@@ -68,8 +71,8 @@ export function CircularSlider({ onTime, duration, onChange }: Props) {
             }
         }
 
-        const startRad = (startAngle - 90) * (Math.PI / 180);
-        const endRad = (endAngle - 90) * (Math.PI / 180);
+        const startRad = isFullCycle ? 0 : (startAngle - 90) * (Math.PI / 180);
+        const endRad = isFullCycle ? (2 * Math.PI) : (endAngle - 90) * (Math.PI / 180);
 
         createArc(ctx, centerX, centerY, radius - 20, startRad, endRad, { color: 'rgba(251,191,36, 0.8)', lineWidth: 30 });
 
@@ -87,7 +90,7 @@ export function CircularSlider({ onTime, duration, onChange }: Props) {
         drawHandle(endAngle, 'end');
 
         const hoursDiff = ((endAngle - startAngle + 360) % 360) / 15;
-        const time = hoursToTime(hoursDiff);
+        const time = isFullCycle ? '24h' : hoursToTime(hoursDiff);
 
         createText(ctx, centerX, centerY - 15, time, { color: '#374151', fontSize: 24, bold: true });
 
@@ -128,7 +131,11 @@ export function CircularSlider({ onTime, duration, onChange }: Props) {
             let duration = timeToMilliseconds(offTime) - timeToMilliseconds(onTime);
 
             if (duration < 0) {
-                duration += 24 * 60 * 60 * 1000;
+                duration += dayInMilliseconds;
+            }
+
+            if (handleRef.current === 'end' && angles.end === angles.start) {
+                duration = dayInMilliseconds;
             }
 
             onChange(onTime, duration);
