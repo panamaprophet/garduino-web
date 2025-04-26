@@ -51,6 +51,8 @@ export const App = withAuth(() => {
         }
     }, [isConnected]);
 
+    const hasTemperatureWarning = Boolean(state && configuration && (state.temperature > configuration.thresholdTemperature));
+
     return (
         <div className="p-4 max-w-md mx-auto text-sm">
             <Dropdown
@@ -62,7 +64,7 @@ export const App = withAuth(() => {
 
             {controllerId && (
                 <div className="border-b border-b-gray-200">
-                    {state && <StatePanel state={state} />}
+                    {state && <StatePanel state={state} hasTemperatureWarning={hasTemperatureWarning} />}
 
                     {!state && <Loader status="Loading" />}
                 </div>
