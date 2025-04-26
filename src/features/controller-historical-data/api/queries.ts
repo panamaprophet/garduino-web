@@ -1,5 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
-import { getControllerHistoricalData } from ".";
+import { getControllerHistoricalData } from "./api";
 
 export const queries = {
     historicalData: (controllerId: string, startDate: number, endDate: number) => queryOptions({

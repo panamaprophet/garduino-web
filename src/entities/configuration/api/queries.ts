@@ -1,5 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
-import { getConfiguration, getControllerIds } from ".";
+import { getConfiguration, getControllerIds } from "./api";
 
 export const queries = {
     listConfigurations: queryOptions({

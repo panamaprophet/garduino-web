@@ -15,5 +15,9 @@ export const getControllerHistoricalData = (
         searchParams.append('endDate', endDate.toString());
     }
 
-    return sendRequest(`/data/${controllerId}?${searchParams}`);
+    return sendRequest<(
+        { ts: number; event: 'run', isOn: boolean; } |
+        { ts: number; event: 'switch', isOn: boolean } |
+        { ts: number; event: 'update', humidity: number; temperature: number; }
+    )[]>(`/v1/controllers/${controllerId}/data?${searchParams}`);
 };
