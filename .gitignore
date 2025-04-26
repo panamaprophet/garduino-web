@@ -5,6 +5,9 @@ src/aws-exports.ts
 amplify/backend/hosting/S3AndCloudFront/template.json
 amplify/backend/hosting/S3AndCloudFront/parameters.json
 
+
+.vscode/
+
 .env.*
 .env
 
