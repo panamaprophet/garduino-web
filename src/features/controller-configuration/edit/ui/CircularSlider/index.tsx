@@ -1,17 +1,22 @@
 import { useRef, useEffect, useState } from 'react';
 import { hoursToTime, millisecondsToTime, timeToMilliseconds } from '@/shared/lib/date';
-
-import { angleToCoords } from './lib/angleToCoords';
-import { angleToTime } from './lib/angleToTime';
-import { getAngleFromEvent } from './lib/getAngleFromEvent';
-import { getClosestHandle } from './lib/getClosestHandle';
-import { timeToAngle } from './lib/timeToAngle';
+import { upscaleCanvas, clearCanvas, createArc, createCircle, createText, createLine } from '@/shared/lib/canvas';
+import { timeToAngle, angleToCoords, getAngleFromCoordinates, getClosestHandle, angleToTime } from '@/shared/lib/trigonometry';
 
 interface Props {
     onTime: string;
     duration: number;
     onChange: (onTime: string, duration: number) => void;
 }
+
+const getCoordinatesFromEvent = (event: MouseEvent | TouchEvent) => {
+    const isTouch = 'touches' in event;
+
+    const x = (isTouch ? event.touches[0]?.clientX : event.clientX) ?? 0;
+    const y = (isTouch ? event.touches[0]?.clientY : event.clientY) ?? 0;
+
+    return { x, y };
+};
 
 export function CircularSlider({ onTime, duration, onChange }: Props) {
     const startAngle = timeToAngle(onTime);
@@ -23,119 +28,74 @@ export function CircularSlider({ onTime, duration, onChange }: Props) {
 
     useEffect(() => {
         const canvas = canvasRef.current;
-        const ctx = canvas?.getContext("2d");
+        const ctx = canvas?.getContext('2d');
 
         if (!canvas || !ctx) {
             return;
         }
 
-        const dpr = window.devicePixelRatio || 1;
-        const rect = canvas.getBoundingClientRect();
+        const { width, height } = canvas.getBoundingClientRect();
 
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-
-        ctx.scale(dpr, dpr);
-
-        const width = rect.width;
-        const height = rect.height;
+        upscaleCanvas(ctx, width, height);
 
         const centerX = width / 2;
         const centerY = height / 2;
-
         const radius = Math.min(width, height) / 2 - 40;
 
-        ctx.clearRect(0, 0, width, height);
+        clearCanvas(ctx, width, height);
 
-        // Draw background circle
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-        ctx.fillStyle = "#f3f4f6";
-        ctx.fill();
+        // Background circle
+        createCircle(ctx, centerX, centerY, radius, { color: '#f3f4f6' });
 
-        // Draw time markers
+        // Time markers
         for (let hour = 0; hour < 24; hour++) {
-            const angle = hour * 15 - 90
-            const radians = angle * (Math.PI / 180)
-            const isMainMarker = hour % 6 === 0
+            const angle = hour * 15 - 90;
+            const radians = angle * (Math.PI / 180);
+            const isMainMarker = hour % 6 === 0;
+            const innerRadius = isMainMarker ? radius - 15 : radius - 10;
+            const outerRadius = radius - 2;
 
-            const innerRadius = isMainMarker ? radius - 15 : radius - 10
-            const outerRadius = radius - 2
+            const innerX = centerX + innerRadius * Math.cos(radians);
+            const innerY = centerY + innerRadius * Math.sin(radians);
+            const outerX = centerX + outerRadius * Math.cos(radians);
+            const outerY = centerY + outerRadius * Math.sin(radians);
 
-            const innerX = centerX + innerRadius * Math.cos(radians)
-            const innerY = centerY + innerRadius * Math.sin(radians)
-            const outerX = centerX + outerRadius * Math.cos(radians)
-            const outerY = centerY + outerRadius * Math.sin(radians)
-
-            ctx.beginPath()
-            ctx.moveTo(innerX, innerY)
-            ctx.lineTo(outerX, outerY)
-            ctx.strokeStyle = isMainMarker ? "#6b7280" : "#d1d5db"
-            ctx.lineWidth = isMainMarker ? 2 : 1
-            ctx.stroke()
+            createLine(ctx, innerX, innerY, outerX, outerY, { color: isMainMarker ? '#6b7280' : '#d1d5db', lineWidth: isMainMarker ? 2 : 1 });
 
             if (isMainMarker) {
-                const textRadius = radius + ([6, 18].includes(hour) ? 20 : 10)
-                const textX = centerX + textRadius * Math.cos(radians)
-                const textY = centerY + textRadius * Math.sin(radians)
+                const textRadius = radius + ([6, 18].includes(hour) ? 20 : 10);
+                const textX = centerX + textRadius * Math.cos(radians);
+                const textY = centerY + textRadius * Math.sin(radians);
 
-                ctx.font = "12px sans-serif"
-                ctx.fillStyle = "#6b7280"
-                ctx.textAlign = "center"
-                ctx.textBaseline = "middle"
-                ctx.fillText(`${hour}:00`, textX, textY)
+                createText(ctx, textX, textY, `${hour}:00`, { color: '#6b7280', fontSize: 12 });
             }
         }
 
-        // Draw active arc
-        const startRad = (angles.start - 90) * (Math.PI / 180)
-        const endRad = (angles.end - 90) * (Math.PI / 180)
+        // Active arc
+        const startRad = (angles.start - 90) * (Math.PI / 180);
+        const endRad = (angles.end - 90) * (Math.PI / 180);
 
-        ctx.beginPath()
-        ctx.arc(centerX, centerY, radius - 20, startRad, endRad)
-        ctx.lineWidth = 30
-        ctx.strokeStyle = "rgba(251,191,36, 0.8)"
-        ctx.stroke()
+        createArc(ctx, centerX, centerY, radius - 20, startRad, endRad, { color: 'rgba(251,191,36, 0.8)', lineWidth: 30 });
 
-        // Draw handles
-        const drawHandle = (angle: number, icon: "sun" | "moon") => {
-            const { x, y } = angleToCoords(angle, radius - 20, centerX, centerY)
+        // Handles
+        const drawHandle = (angle: number, icon: 'start' | 'end') => {
+            const { x, y } = angleToCoords(angle, radius - 20, centerX, centerY);
 
-            // Draw handle circle
-            ctx.beginPath()
-            ctx.arc(x, y, 14, 0, 2 * Math.PI)
-            ctx.fillStyle = "white"
-            ctx.fill()
-            ctx.strokeStyle = "#fbbf24"
-            ctx.lineWidth = 2
-            ctx.stroke()
+            createCircle(ctx, x, y, 14, { color: 'white', strokeColor: '#fbbf24', strokeWidth: 2 });
+            createText(ctx, x, y, icon === 'start' ? '☀️' : '🌙', { color: icon === 'start' ? 'rgba(245,158,11,0.8)' : 'rgba(107,114,128,0.8)', fontSize: 16 });
+        };
 
-            // Draw icon
-            ctx.fillStyle = icon === "sun" ? "rgba(245,158,11,0.8)" : "rgba(107,114,128,0.8)"
-            ctx.font = "12px sans-serif"
-            ctx.textAlign = "center"
-            ctx.textBaseline = "middle"
-            ctx.fillText(icon === "sun" ? "☀️" : "🌙", x, y)
-        }
+        drawHandle(angles.start, 'start');
+        drawHandle(angles.end, 'end');
 
-        drawHandle(angles.start, "sun")
-        drawHandle(angles.end, "moon")
-
-        // Draw center info
-        const hoursDiff = ((angles.end - angles.start + 360) % 360) / 15
+        // Center info
+        const hoursDiff = ((angles.end - angles.start + 360) % 360) / 15;
         const time = hoursToTime(hoursDiff);
 
-        ctx.font = "bold 24px sans-serif"
-        ctx.fillStyle = "#374151"
-        ctx.textAlign = "center"
-        ctx.textBaseline = "middle"
+        createText(ctx, centerX, centerY - 15, time, { color: '#374151', fontSize: 24, bold: true });
 
-        ctx.fillText(time, centerX, centerY - 15)
-
-        ctx.font = "14px sans-serif"
-        ctx.fillStyle = "#6b7280"
-        ctx.fillText("Light Cycle", centerX, centerY + 15)
-    }, [angles])
+        createText(ctx, centerX, centerY + 15, 'Light Cycle', { color: '#6b7280', fontSize: 14 });
+    }, [angles]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -145,21 +105,23 @@ export function CircularSlider({ onTime, duration, onChange }: Props) {
         }
 
         const handleMouseDown = (event: MouseEvent | TouchEvent) => {
-            const angle = getAngleFromEvent(event, canvas);
-            const closestHandle = getClosestHandle(angle, angles);
+            const coordinates = getCoordinatesFromEvent(event);
+            const angle = getAngleFromCoordinates(coordinates, canvas);
+            const handle = getClosestHandle(angle, angles);
 
-            setDragging(closestHandle);
-        }
+            return setDragging(handle);
+        };
 
-        const handleMouseMove = (e: MouseEvent | TouchEvent) => {
+        const handleMouseMove = (event: MouseEvent | TouchEvent) => {
             if (!dragging) {
-                return
+                return;
             }
 
-            const angle = getAngleFromEvent(e, canvas);
+            const coordinates = getCoordinatesFromEvent(event);
+            const angle = getAngleFromCoordinates(coordinates, canvas);
 
             setAngles((prev) => ({ ...prev, [dragging]: angle }));
-        }
+        };
 
         const handleMouseUp = () => {
             if (!dragging) {
@@ -170,17 +132,14 @@ export function CircularSlider({ onTime, duration, onChange }: Props) {
             const offTime = angleToTime(angles.end);
 
             let duration = timeToMilliseconds(offTime) - timeToMilliseconds(onTime);
-
+            
             if (duration < 0) {
-                const dayInMilliseconds = 24 * 60 * 60 * 1000;
-
-                duration += dayInMilliseconds;
+                duration += 24 * 60 * 60 * 1000;
             }
 
             onChange(onTime, duration);
-
             setDragging(null);
-        }
+        };
 
         canvas.addEventListener('mousedown', handleMouseDown);
         canvas.addEventListener('touchstart', handleMouseDown, { passive: true });
@@ -200,8 +159,8 @@ export function CircularSlider({ onTime, duration, onChange }: Props) {
 
             window.removeEventListener('mouseup', handleMouseUp);
             window.removeEventListener('touchend', handleMouseUp);
-        }
-    }, [dragging, angles, onChange])
+        };
+    }, [dragging, angles, onChange]);
 
     return (
         <div className="flex flex-col items-center">
@@ -220,5 +179,5 @@ export function CircularSlider({ onTime, duration, onChange }: Props) {
                 </div>
             </div>
         </div>
-    )
+    );
 }
