@@ -1,0 +1,44 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allow manual trigger from the Actions tab
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    environment: sandbox
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build the website
+        run: npm run build
+        env:
+          VITE_REGION: ${{ vars.VITE_REGION }}
+          VITE_WS_API: ${{ vars.VITE_WS_API }}
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_COGNITO_USER_POOL_ID: ${{ vars.VITE_COGNITO_USER_POOL_ID }}
+          VITE_COGNITO_USER_POOL_CLIENT_ID: ${{ vars.VITE_COGNITO_USER_POOL_CLIENT_ID }}
+          VITE_COGNITO_IDENTITY_POOL_ID: ${{ vars.VITE_COGNITO_IDENTITY_POOL_ID }}
+
+      - name: Upload static files
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        # if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/deploy-pages@v2
