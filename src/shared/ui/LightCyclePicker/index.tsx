@@ -44,7 +44,7 @@ export const LightCyclePicker = ({ onTime, duration, onChange }: Props) => {
         const centerY = height / 2;
         const radius = Math.min(width, height) / 2 - 40;
 
-        clearCanvas(ctx, width, height);
+        clearCanvas(ctx);
 
         createCircle(ctx, centerX, centerY, radius, { color: '#f3f4f6' });
 

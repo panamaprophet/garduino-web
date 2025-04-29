@@ -10,11 +10,10 @@ export const upscaleCanvas = (
     ctx.scale(dpr, dpr);
 };
 
-export const clearCanvas = (
-    ctx: CanvasRenderingContext2D,
-    width: number,
-    height: number
-) => {
+export const clearCanvas = (ctx: CanvasRenderingContext2D) => {
+    const width = ctx.canvas.width;
+    const height = ctx.canvas.height;
+
     ctx.clearRect(0, 0, width, height);
 };
 
@@ -42,7 +41,7 @@ export const createText = (
     x: number,
     y: number,
     text: string,
-    options?: Partial<{ color: string; fontSize: number; bold: boolean; textAlign: 'center'; textBaseline: 'middle' }>
+    options?: Partial<{ color: string; fontSize: number; bold: boolean; textAlign: 'center' | 'left' | 'right'; textBaseline: 'middle' }>
 ) => {
     ctx.fillStyle = options?.color ?? 'black';
     ctx.font = `${options?.bold ? "bold " : ""}${options?.fontSize}px sans-serif`;
@@ -81,4 +80,64 @@ export const createLine = (
     ctx.strokeStyle = options.color;
     ctx.lineWidth = options.lineWidth;
     ctx.stroke();
+};
+
+
+export const createSmoothLine = (context: CanvasRenderingContext2D, coordinates: [x: number, y: number][], color: string) => {
+    if (!coordinates[0]) {
+        return;
+    }
+
+    context.beginPath();
+    context.moveTo(...coordinates[0]);
+
+    for (let i = 0; i < coordinates.length - 1; i ++) {
+        const item = coordinates[i];
+        const nextItem = coordinates[i + 1];
+
+        if (!item || !nextItem) {
+            continue;
+        }
+
+        const midX = (item[0] + nextItem[0]) / 2;
+        const midY = (item[1] + nextItem[1]) / 2;
+        const controlPointX1 = (midX + item[0]) / 2;
+        const controlPointX2 = (midX + nextItem[0]) / 2;
+
+        context.quadraticCurveTo(
+            controlPointX1,
+            item[1],
+            midX,
+            midY,
+        );
+
+        context.quadraticCurveTo(
+            controlPointX2,
+            nextItem[1],
+            nextItem[0],
+            nextItem[1],
+        );
+    }
+
+    context.lineWidth = 2;
+    context.strokeStyle = color;
+    context.stroke();
+};
+
+export const createRect = (
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    options: { color: string; lineWidth?: number }
+) => {
+    ctx.fillStyle = options.color;
+    ctx.fillRect(x, y, width, height);
+    
+    if (options.lineWidth) {
+        ctx.strokeStyle = options.color;
+        ctx.lineWidth = options.lineWidth;
+        ctx.strokeRect(x, y, width, height);
+    }
 };

@@ -10,13 +10,13 @@ export const sendRequest = async <TResult>(path: string, options?: {
         Authorization: `Bearer ${jwt}`,
     };
 
-    const url = `${import.meta.env.VITE_API_URL}${path}`;
+    const url = new URL(path, import.meta.env.VITE_API_URL);
 
     const response = await fetch(url, { headers, ...options });
 
     const result: TResult = await response.json();
 
-    if (response.status !== 200) {
+    if (!response.ok) {
         throw Error('Request Error', { cause: result });
     }
 
