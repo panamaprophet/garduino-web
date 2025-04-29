@@ -1,0 +1,49 @@
+name: Deployment
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allow manual triggering of the workflow
+
+env:
+  NODE_ENV: production
+
+jobs:
+  deploy:
+    environment: sandbox
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # Build the application
+      - name: Build the application
+        env:
+          # Map environment variables from .env.local
+          VITE_REGION: ${{ vars.VITE_REGION }}
+          VITE_WS_API: ${{ vars.VITE_WS_API }}
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_COGNITO_USER_POOL_ID: ${{ vars.VITE_COGNITO_USER_POOL_ID }}
+          VITE_COGNITO_USER_POOL_CLIENT_ID: ${{ vars.VITE_COGNITO_USER_POOL_CLIENT_ID }}
+          VITE_COGNITO_IDENTITY_POOL_ID: ${{ vars.VITE_COGNITO_IDENTITY_POOL_ID }}
+        run: npm run build
+
+      # Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
