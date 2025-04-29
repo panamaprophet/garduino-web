@@ -41,7 +41,7 @@ export const createText = (
     x: number,
     y: number,
     text: string,
-    options?: Partial<{ color: string; fontSize: number; bold: boolean; textAlign: 'center' | 'left'; textBaseline: 'middle' }>
+    options?: Partial<{ color: string; fontSize: number; bold: boolean; textAlign: 'center' | 'left' | 'right'; textBaseline: 'middle' }>
 ) => {
     ctx.fillStyle = options?.color ?? 'black';
     ctx.font = `${options?.bold ? "bold " : ""}${options?.fontSize}px sans-serif`;
