@@ -8,7 +8,7 @@ import { ControllerAddButton } from '@/features/controller-configuration/add';
 import { ControllerRebootButton } from '@/features/controller-configuration/reboot';
 
 import { useLocationHash } from './lib/useLocationHash';
-import { ControllerHistoricalData } from '@/features/controller-historical-data';
+// import { ControllerHistoricalData } from '@/features/controller-historical-data';
 
 export const Dashboard = withAuth(() => {
     const [controllerId, setLocationHash] = useLocationHash();
@@ -24,7 +24,7 @@ export const Dashboard = withAuth(() => {
                 {controllerId && (
                     <>
                         <ControllerStatus controllerId={controllerId} />
-                        <ControllerHistoricalData controllerId={controllerId} />
+                        {/* <ControllerHistoricalData controllerId={controllerId} /> */}
                         <ControllerEditForm controllerId={controllerId} />
                         <ControllerRebootButton controllerId={controllerId} />
                     </>
