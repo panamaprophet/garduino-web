@@ -5,6 +5,7 @@ interface Line {
     values: Array<[key: string | number, value: number]>;
     color: string;
     label: string;
+    formatter?: (value: number) => string;
 }
 
 interface Props {
@@ -134,6 +135,19 @@ export const Chart = ({ lines }: Props) => {
         setTooltips([]);
     };
 
+    const tooltipItems = tooltips.reduce<Array<{ x: number; y: number; label: string }>>((result, tooltip) => {
+        const line = lines.find(({ label }) => label === tooltip.label);
+        const value = line?.values[tooltip.index]?.[1];
+
+        if (!line || !value) {
+            return result;
+        }
+
+        const label = line.formatter?.(value) ?? value.toString();
+
+        return [...result, { x: tooltip.x, y: tooltip.y, label }];
+    }, []);
+
     return (
         <div className="flex flex-col gap-1">
             <div className="text-sm">
@@ -148,13 +162,13 @@ export const Chart = ({ lines }: Props) => {
                     onTouchMove={onPointerMove} onTouchEnd={onPointerLeave}
                 />
 
-                {tooltips.map((tooltip, index) => (
+                {tooltipItems.map((tooltip, index) => (
                     <div
                         key={index}
                         className="pointer-events-none text-xs absolute shadow-xs rounded-lg -translate-y-3/4"
                         style={{ top: tooltip.y, left: tooltip.x }}
                     >
-                        {lines.find(({ label }) => label === tooltip.label)!.values[tooltip.index]![1]}
+                        {tooltip.label}
                     </div>
                 ))}
             </div>
