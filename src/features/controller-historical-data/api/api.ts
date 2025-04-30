@@ -18,6 +18,6 @@ export const getControllerHistoricalData = (
     return sendRequest<(
         { ts: number; event: 'run', isOn: boolean; } |
         { ts: number; event: 'switch', isOn: boolean } |
-        { ts: number; event: 'update', humidity: number; temperature: number; }
+        { ts: number; event: 'update', humidity: number; temperature: number; fanSpeed: number }
     )[]>(`/v1/controllers/${controllerId}/data?${searchParams}`);
 };
