@@ -39,10 +39,10 @@ export const Dashboard = withAuth(() => {
                         )}
 
                         {tab === 'configuration' && (
-                            <div>
+                            <>
                                 <ControllerEditForm controllerId={controllerId} />
                                 <ControllerRebootButton controllerId={controllerId} />
-                            </div>
+                            </>
                         )}
                     </>
                 )}

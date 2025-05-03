@@ -1,7 +1,7 @@
 interface Props {
     checked?: boolean;
     disabled?: boolean;
-    onClick: () => void;
+    onChange: () => void;
 }
 
 const classList = `
@@ -12,12 +12,12 @@ checked:bg-current checked:border-transparent checked:after:opacity-100
 disabled:opacity-50 disabled:cursor-not-allowed
 `;
 
-export const Checkbox = ({ checked, disabled, onClick }: Props) => {
+export const Checkbox = ({ checked, disabled, onChange }: Props) => {
     return (
         <input
             type="checkbox"
             className={classList}
-            onClick={onClick}
+            onChange={onChange}
             checked={checked}
             disabled={disabled}
         />
