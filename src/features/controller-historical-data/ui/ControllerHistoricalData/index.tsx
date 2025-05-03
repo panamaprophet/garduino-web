@@ -34,7 +34,7 @@ export const ControllerHistoricalData = ({ controllerId }: { controllerId: strin
         label: 'Fan Speed',
         color: 'oklch(60.4% 0.132 83.420)',
         values: updates.map<[string, number]>((item) => [formatDate(item.ts), (item.fanSpeed / 255) * 100]),
-        formatter: (value: number) => `${value}%`,
+        formatter: (value: number) => `${value.toFixed()}%`,
     };
 
     const lines = [humidity, temperature, fanSpeed];
@@ -59,9 +59,9 @@ export const ControllerHistoricalData = ({ controllerId }: { controllerId: strin
 
             <div className="flex gap-3">
                 {lines.map((line) => (
-                    <label className="flex items-center gap-1" style={{ color: line.color }}>
+                    <label key={line.label} className="flex items-center gap-1.5" style={{ color: line.color }}>
                         <Checkbox
-                            onClick={() => setLineVisibility(line.label)}
+                            onChange={() => setLineVisibility(line.label)}
                             checked={visibleLines.includes(line.label)}
                             disabled={visibleLines.includes(line.label) && visibleLines.length === 1}
                         />
