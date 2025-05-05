@@ -150,7 +150,7 @@ export const Chart = ({ lines }: Props) => {
 
     return (
         <div className="flex flex-col gap-1">
-            <div className="text-sm">
+            <div className="text-sm h-8 my-2 flex items-center" >
                 {dateLabel}
             </div>
 
