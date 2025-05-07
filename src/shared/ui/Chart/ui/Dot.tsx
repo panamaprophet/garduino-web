@@ -21,13 +21,11 @@ export const Dot = ({ value, left, bottom, color = 'black' }: { left: number; bo
 
         <div className="
             absolute
-            opacity-0
-            group-hover:opacity-100
-            px-2
-            py-2
+            px-1
             transition-opacity
             text-xs
             text-gray-600
+            text-current
             whitespace-nowrap
 
             -translate-x-1/2
@@ -38,7 +36,8 @@ export const Dot = ({ value, left, bottom, color = 'black' }: { left: number; bo
             shadow
             rounded
             bg-white
-        " style={{ zIndex: 1000 }}>
+            z-[1000]
+        " style={{ color }}>
             {String(value)}
         </div>
     </span>
