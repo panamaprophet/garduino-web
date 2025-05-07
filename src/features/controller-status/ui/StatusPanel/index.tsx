@@ -54,7 +54,7 @@ export const StatusPanel = ({ controllerId }: { controllerId: string }) => {
     const fanSpeed = 'fanSpeed' in status ? (status.fanSpeed / 255 * 100).toFixed() : '-';
 
     return (
-        <div className="flex justify-between items-center gap-2 pt-0.5 cursor-pointer group relative" onClick={updateState}>
+        <div className="flex justify-between items-center gap-2 pt-0.5 cursor-pointer group relative grid auto-cols-fr grid-flow-col" onClick={updateState}>
             <Card className={status.isOn ? 'ring-2 ring-offset-2 ring-amber-500 text-amber-500' : ''}>
                 <Bulb />
                 <span className="text-black font-medium">{isOn}</span>
