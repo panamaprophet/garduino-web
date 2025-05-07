@@ -1,176 +1,155 @@
-import { useRef, useState, useEffect, useMemo, MouseEvent, TouchEvent } from 'react';
-import { clearCanvas, createCircle, createLine, createSmoothLine, createText, upscaleCanvas } from '@/shared/lib/canvas';
+import { MouseEventHandler, ReactNode, useState } from 'react';
+import { XLabel, YLabel } from './ui/GuideLabel';
+import { Line } from './ui/Line';
+import { GuideLine } from './ui/GuideLIne';
+import { formatLabel } from './lib/formatLabel';
+import { Dot } from './ui/Dot';
 
 interface Line {
-    values: Array<[key: string | number, value: number]>;
-    color: string;
     label: string;
-    formatter?: (value: number) => string;
+    color: string;
+    values: Array<[x: number | string, y: number]>;
 }
 
 interface Props {
-    lines: Array<Line>;
+    lines: Array<Line>
+    formatter?: (y: number, x: number | string) => string;
 }
 
-const normalize = (value: number, min: number, max: number, canvasSize: number) => {
-    return ((value - min) / (max - min)) * canvasSize;
-};
+export const Chart = (props: Props) => {
+    const { lines } = props;
+    const { formatter = (value, label) => `${value} - ${label}` } = props;
 
-const getClosestPoint = (target: { x: number }, points: Array<[x: number, y: number]>) => {
-    let closestPoint = -1;
-    let minDistance = Infinity;
+    const xValues = lines.at(0)?.values.map(([value]) => value) ?? [];
+    const yValues = lines.flatMap((line) => line.values.map(([, value]) => value));
 
-    points.forEach(([x], index) => {
-        const distance = Math.sqrt((x - target.x) ** 2);
+    const xMin = 0;
+    const xMax = xValues.length - 1;
+    const yMax = Math.max(...yValues) || 1;
 
-        if (distance < minDistance) {
-            minDistance = distance;
-            closestPoint = index;
-        }
-    });
+    const multiplier = Math.min(10 ** Math.max(1, Math.trunc(yMax).toString().length - 1), Math.ceil(yMax));
+    const offset = 0;
 
-    return closestPoint;
-};
+    const width = 100; /* in percent */
+    const height = Math.ceil(yMax / multiplier) * multiplier;
 
-export const Chart = ({ lines }: Props) => {
-    const offset = 10;
+    const columns: ReactNode[] = [];
+    const xLabels: ReactNode[] = [];
+    const yLabels: ReactNode[] = [];
 
-    const keys = useMemo(() => lines.flatMap((line) => line.values.map(([key]) => key)), [lines]);
-    const values = useMemo(() => lines.flatMap((line) => line.values.map(([, value]) => value)), [lines]);
+    const columnsCount = Math.min(5, xValues.length);
+    const rowsCount = 5;
 
-    const min = Math.min(...values);
-    const max = Math.max(...values);
+    const stepX = (width - offset * 2) / Math.max(1, (xMax - xMin));
+    const stepY = (xValues.length - 1) / Math.max(columnsCount - 1, 1);
 
-    const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    for (let i = 0; i < columnsCount; i++) {
+        const columnIndex = Math.trunc(i * stepY);
+        const left = columnsCount === 1 ? (width / 2) : (columnIndex * stepX + offset);
+        const xLabel = xValues[columnIndex];
 
-    const [tooltips, setTooltips] = useState<Array<{ x: number; y: number; index: number; label: string }>>([]);
+        columns.push(<GuideLine key={`guide_vertical_${left}`} type="vertical" left={left} size={height} />);
+        xLabels.push(<XLabel key={`label_${left}`} position={left}>{xLabel}</XLabel>);
+    }
 
-    const dateLabel = tooltips.length ? keys[tooltips.at(0)?.index!] : `${keys[0]} - ${keys.at(-1)}`
+    for (let i = 0; i < height; i += height / rowsCount) {
+        columns.push(
+            <GuideLine key={`guide_horizontal_${i}`} type="horizontal" top={i} left={offset} size={width - offset} />
+        );
 
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        const ctx = canvas?.getContext('2d');
+        yLabels.push(
+            <YLabel key={`guide_label_${i}`} position={(height - i) / (height / 100)}>
+                {formatLabel(height - i)}
+            </YLabel>
+        );
+    }
 
-        if (!canvas || !ctx) {
-            return;
-        }
+    const [dots, setDots] = useState<[
+        x: number,
+        y: number,
+        value: number,
+        label: string | number,
+        color: string,
+    ][]>([]);
 
-        const { width, height } = canvas.getBoundingClientRect();
+    const onMouseMove: MouseEventHandler<HTMLDivElement> = (event) => {
+        const { left, width } = event.currentTarget.getBoundingClientRect();
 
-        upscaleCanvas(ctx, width, height);
+        const mouseX = Math.round(((event.clientX - left) / width) * 100); /* in percent */
+        const distance = stepX / 2;
 
-        const innerWidth = width - 2 * offset;
-        const innerHeight = height - 2 * offset;
+        const points: typeof dots = [];
 
-        const multiplier = Math.pow(10, max.toString().length - 1) / 2;
-        const range = max - min;
+        lines.forEach(({ values, color }) => {
+            for (const [index, value] of values.entries()) {
+                // @todo: skip first {mouseX}% of items
+                const left = index * stepX; /* + offset / 2; */
+                const bottom = (value[1] / height) * 100;
 
-        clearCanvas(ctx);
+                if (Math.abs(left - mouseX) < distance) {
+                    points.push([left, bottom, value[1], value[0], color]);
+                }
 
-        // grid
-
-        for (let i = 0; i < max; i++) {
-            const value = i * multiplier;
-
-            const y = offset + innerHeight - normalize(value, min, min + range, innerHeight);
-
-            createLine(ctx, offset, y, width - offset, y, { color: 'rgba(0, 0, 0, 0.05)', lineWidth: 1 });
-
-            createText(ctx, offset, y + 6, value.toString(), { textAlign: 'left', color: 'lightgray', fontSize: 8 });
-        }
-
-        // lines + dots
-
-        lines.forEach(({ values, label, color }) => {
-            const cooridantes = values.map<[x: number, y: number]>(([, value], index) => [
-                offset + (index / (values.length - 1)) * innerWidth,
-                offset + innerHeight - normalize(value, min, max, innerHeight),
-            ]);
-
-            createSmoothLine(ctx, cooridantes, color);
-
-            const tooltip = tooltips.find((item) => item.label === label);
-
-            if (tooltip) {
-                createCircle(ctx, tooltip.x, tooltip.y, 3, { color: 'white', strokeWidth: 2, strokeColor: color });
+                if (left - mouseX > distance) {
+                    break;
+                }
             }
         });
-    }, [values, tooltips]);
 
-    const onPointerMove = (event: MouseEvent<HTMLCanvasElement> | TouchEvent<HTMLCanvasElement>) => {
-        if (!canvasRef.current) {
-            return;
-        }
-
-        const isTouch = 'touches' in event;
-
-        const clientX = (isTouch ? event.touches[0]?.clientX : event.clientX) ?? 0;
-
-        const rect = canvasRef.current.getBoundingClientRect();
-        const mouseX = clientX - rect.left;
-
-        const innerWidth = rect.width - 2 * offset;
-        const innerHeight = rect.height - 2 * offset;
-
-        const result = lines.reduce<Array<{ x: number, y: number, index: number, label: string }>>((result, { values, label }) => {
-            const cooridantes = values.map<[x: number, y: number]>(([, value], index) => [
-                offset + (index / (values.length - 1)) * innerWidth,
-                offset + innerHeight - normalize(value, min, max, innerHeight),
-            ]);
-
-            const index = getClosestPoint({ x: mouseX }, cooridantes);
-            const point = cooridantes[index];
-
-            if (point) {
-                result.push({ x: point[0], y: point[1], label, index });
-            }
-
-            return result;
-        }, []);
-
-        setTooltips(result);
+        setDots(points);
     };
 
-    const onPointerLeave = () => {
-        setTooltips([]);
+    const onMouseLeave: MouseEventHandler<HTMLDivElement> = () => {
+        setDots([]);
     };
-
-    const tooltipItems = tooltips.reduce<Array<{ x: number; y: number; label: string }>>((result, tooltip) => {
-        const line = lines.find(({ label }) => label === tooltip.label);
-        const value = line?.values[tooltip.index]?.[1];
-
-        if (!line || !value) {
-            return result;
-        }
-
-        const label = line.formatter?.(value) ?? value.toString();
-
-        return [...result, { x: tooltip.x, y: tooltip.y, label }];
-    }, []);
 
     return (
-        <div className="flex flex-col gap-1">
-            <div className="text-sm h-8 my-2 flex items-center" >
-                {dateLabel}
+        <div className="w-full h-full">
+            <div className="relative flex h-full">
+                <div data-role="y-labels" className="w-6 relative">
+                    {yLabels}
+                </div>
+
+                <div
+                    onMouseMove={onMouseMove}
+                    onMouseLeave={onMouseLeave}
+                    className="relative w-full h-full border-b border-[#191926]/8"
+                >
+                    <svg
+                        data-role="chart"
+                        preserveAspectRatio="none"
+                        viewBox={`${offset} 0 ${width - offset * 2} ${height}`}
+                    >
+                        {columns}
+
+                        {lines.map(((line) =>
+                            <Line
+                                key={line.label}
+                                values={line.values.map(([, value]) => value)}
+                                width={width}
+                                height={height}
+                                offset={offset}
+                                color={line.color}
+                            />
+                        ))}
+                    </svg>
+
+                    <div data-role="dots" className="absolute top-0 left-0 w-full h-full">
+                        {dots.map(([x, y, value, label, color], index) => (
+                            <Dot
+                                key={index}
+                                left={x}
+                                bottom={y}
+                                color={color}
+                                value={formatter(value, label)}
+                            />
+                        ))}
+                    </div>
+                </div>
             </div>
 
-            <div className="w-full p-2 border rounded-lg shadow-xs relative">
-                <canvas
-                    ref={canvasRef}
-                    className="w-full aspect-video"
-                    onMouseMove={onPointerMove} onMouseLeave={onPointerLeave}
-                    onTouchMove={onPointerMove} onTouchEnd={onPointerLeave}
-                />
-
-                {tooltipItems.map((tooltip, index) => (
-                    <div
-                        key={index}
-                        className="pointer-events-none text-xs absolute shadow-xs rounded-lg -translate-y-3/4"
-                        style={{ top: tooltip.y, left: tooltip.x }}
-                    >
-                        {tooltip.label}
-                    </div>
-                ))}
+            <div data-role="x-labels" className="relative left-3 w-full pt-4">
+                {xLabels}
             </div>
         </div>
     );

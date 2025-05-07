@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { Tabs } from '@/shared/ui/Tabs';
-import { AxisX, AxisY, Chart, Line, Tooltips, Zoom } from '@/shared/ui/Chart/v2';
+import { Chart } from '@/shared/ui/Chart';
 import { Loader } from '@/shared/ui/Loader';
 import { Checkbox } from '@/shared/ui/Checkbox';
 import { formatDate } from '@/shared/lib/date';
@@ -57,10 +57,6 @@ export const ControllerHistoricalData = ({ controllerId }: { controllerId: strin
         formatter: (value: number) => `${value.toFixed()}%`,
     };
 
-    const lines = [humidity, temperature, fanSpeed];
-
-    const dates = lines.flatMap((item) => item.values.map((item) => item[0]));
-
     const [visibleLines, setVisibleLines] = useState([temperature.label, humidity.label]);
 
     const setLineVisibility = (label: string) => {
@@ -71,32 +67,24 @@ export const ControllerHistoricalData = ({ controllerId }: { controllerId: strin
         setVisibleLines(changes);
     };
 
+    const lines = [humidity, temperature, fanSpeed];
+
+    const chartLines = lines.filter(line => visibleLines.includes(line.label));
+    const chartLabelFormatter = (value: number, date: string | number) => `${date} - ${value}`;
+
     return (
-        <div className="flex flex-col gap-2 relative">
+        <div className="flex flex-col gap-4 relative">
             {isLoading && (
                 <Loader status="Loading logs" />
             )}
 
             {!isLoading && (
                 <>
-                    {/* <div className="absolute right-0 top-1.5"> */}
-                        <Tabs tabs={['1d', '3d', '7d']} currentTab={range} onClick={setRange} />
-                    {/* </div> */}
+                    <Tabs tabs={['1d', '3d', '7d']} currentTab={range} onClick={setRange} />
 
-                    {/* <Chart lines={lines.filter(line => visibleLines.includes(line.label))} /> */}
-                    <Chart values={lines.filter(line => visibleLines.includes(line.label)).map((line) => line.values.map((item) => item[1]))}>
-                        <Line label="temperature" color="#73A921" />
-                        <Line label="humidity" color="#487AFA" />
+                    <Chart lines={chartLines} formatter={chartLabelFormatter} />
 
-                        <AxisX labels={dates} />
-                        <AxisY />
-
-                        <Tooltips formatLabel={(value, line) => `${line}: ${value}`} />
-
-                        <Zoom />
-                    </Chart>
-
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 mt-4">
                         {lines.map((line) => (
                             <label key={line.label} className="flex items-center gap-1.5" style={{ color: line.color }}>
                                 <Checkbox
