@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { withAuth } from '@/shared/auth';
 import { Tabs } from '@/shared/ui/Tabs';
 
-import { ControllerStatus } from '@/features/controller-status';
+import { ControllerStatus } from '@/features/status';
 
-import { ControllerList } from '@/features/controller-configuration/list';
-import { ControllerEditForm } from '@/features/controller-configuration/edit';
-import { ControllerAddButton } from '@/features/controller-configuration/add';
-import { ControllerRebootButton } from '@/features/controller-configuration/reboot';
-import { ControllerHistoricalData } from '@/features/controller-historical-data';
+import { ControllerList } from '@/features/configuration/list';
+import { ControllerEditForm } from '@/features/configuration/edit';
+import { ControllerAddButton } from '@/features/configuration/add';
+import { ControllerRebootButton } from '@/features/configuration/reboot';
+import { ControllerHistoricalData } from '@/features/historical-data';
 
 import { useLocationHash } from './lib/useLocationHash';
 
