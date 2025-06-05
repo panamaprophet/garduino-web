@@ -53,7 +53,7 @@ export const ControllerHistoricalData = ({ controllerId }: { controllerId: strin
     const fanSpeed = {
         label: 'Fan Speed',
         color: 'oklch(60.4% 0.132 83.420)',
-        values: updates.map<[string, number]>((item) => [formatDate(item.ts), (item.fanSpeed / 255) * 100]),
+        values: updates.map<[string, number]>((item) => [formatDate(item.ts), Math.ceil(item.fanSpeed / 255 * 100)]),
         formatter: (value: number) => `${value.toFixed()}%`,
     };
 
