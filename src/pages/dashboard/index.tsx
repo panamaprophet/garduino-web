@@ -9,13 +9,14 @@ import { ControllerEditForm } from '@/features/configuration/edit';
 import { ControllerAddButton } from '@/features/configuration/add';
 import { ControllerRebootButton } from '@/features/configuration/reboot';
 import { ControllerHistoricalData } from '@/features/historical-data';
+import { FirmwareUpdatePanel } from '@/features/firmware';
 
 import { useLocationHash } from './lib/useLocationHash';
 
 export const Dashboard = withAuth(() => {
     const [controllerId, setLocationHash] = useLocationHash();
 
-    const tabs = ['logs', 'configuration'];
+    const tabs = ['logs', 'configuration', 'firmware'];
     const [tab, setTab] = useState('logs');
 
     return (
@@ -43,6 +44,10 @@ export const Dashboard = withAuth(() => {
                                 <ControllerEditForm controllerId={controllerId} />
                                 <ControllerRebootButton controllerId={controllerId} />
                             </>
+                        )}
+
+                        {tab === 'firmware' && (
+                            <FirmwareUpdatePanel controllerId={controllerId} />
                         )}
                     </>
                 )}

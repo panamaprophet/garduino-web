@@ -5,7 +5,7 @@ import { Tabs } from '@/shared/ui/Tabs';
 import { Chart } from '@/shared/ui/Chart';
 import { Loader } from '@/shared/ui/Loader';
 import { Checkbox } from '@/shared/ui/Checkbox';
-import { formatDate } from '@/shared/lib/date';
+import { formatTime } from '@/shared/lib/date';
 
 import { queries } from '@/entities/controller-event';
 
@@ -39,21 +39,21 @@ export const ControllerHistoricalData = ({ controllerId }: { controllerId: strin
     const humidity = {
         label: 'Humidity',
         color: 'oklch(58.8% 0.158 241.966)',
-        values: updates.map<[string, number]>((item) => [formatDate(item.ts), item.humidity]),
+        values: updates.map<[string, number]>((item) => [formatTime(item.ts), item.humidity]),
         formatter: (value: number) => `${value}%`,
     };
 
     const temperature = {
         label: 'Temperature',
         color: 'oklch(59.6% 0.145 163.225)',
-        values: updates.map<[string, number]>((item) => [formatDate(item.ts), item.temperature]),
+        values: updates.map<[string, number]>((item) => [formatTime(item.ts), item.temperature]),
         formatter: (value: number) => `${value}℃`,
     }
 
     const fanSpeed = {
         label: 'Fan Speed',
         color: 'oklch(60.4% 0.132 83.420)',
-        values: updates.map<[string, number]>((item) => [formatDate(item.ts), Math.trunc(item.fanSpeed / 255 * 100)]),
+        values: updates.map<[string, number]>((item) => [formatTime(item.ts), Math.trunc(item.fanSpeed / 255 * 100)]),
         formatter: (value: number) => `${value.toFixed()}%`,
     };
 
