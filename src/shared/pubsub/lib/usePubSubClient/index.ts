@@ -15,11 +15,11 @@ export const usePubSubClient = (topics: Topics = {}, options?: { onConnect: () =
     useEffect(() => {
         console.log('[pubsub] subscribing to', topics);
 
-        const subscibtions = Object.entries(topics).map(([topic, callback]) => subscribe(topic, callback));
+        const subscriptions = Object.entries(topics).map(([topic, callback]) => subscribe(topic, callback));
 
         return () => {
             console.log('[pubsub] unsubscribing...');
-            subscibtions.forEach(subscribtion => subscribtion.unsubscribe());
+            subscriptions.forEach((subscription) => subscription.unsubscribe());
         };
     }, [hashKey]);
 

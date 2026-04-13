@@ -35,10 +35,11 @@ export const LoginForm = ({ onSubmit }: { onSubmit: (credentials: { username: st
                 event.preventDefault();
 
                 try {
-                    setLoading(true); await onSubmit(state);
+                    setLoading(true); 
+                    await onSubmit(state);
                 } catch (error) {
                     console.log('[auth] error during sign in:', error);
-
+                } finally {
                     setLoading(false);
                 }
             }}>

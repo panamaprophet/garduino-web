@@ -10,10 +10,19 @@ import { Bulb, Drop, Fan, Temperature } from '@/shared/ui/Icon';
 
 import { usePubSubClient } from '@/shared/pubsub';
 
+const defaultStatus: ControllerStatus = {
+    isOn: false,
+    humidity: 0,
+    temperature: 0,
+    fanSpeed: 0,
+    stabilityFactor: 0,
+};
+
 export const StatusPanel = ({ controllerId }: { controllerId: string }) => {
     const { data: configuration } = useQuery(queries.getConfiguration(controllerId));
 
-    const [status, setStatus] = useState<ControllerStatus>();
+    const [status, setStatus] = useState<ControllerStatus>(defaultStatus);
+
     const [isLoading, setLoading] = useState(false);
 
     const updateState = () => {
@@ -31,7 +40,7 @@ export const StatusPanel = ({ controllerId }: { controllerId: string }) => {
         [`controllers/${controllerId}/events/pub`]: (data: { [k: string]: unknown }) => {
             const changes = data as unknown as Pick<ControllerStatus, 'temperature' | 'humidity' | 'isOn'>
 
-            setStatus(status => ({ ...status!, ...changes, lastUpdateOn: Date.now() }));
+            setStatus(status => ({ ...status, ...changes, lastUpdateOn: Date.now() }));
             setLoading(false);
         },
     };
@@ -51,7 +60,7 @@ export const StatusPanel = ({ controllerId }: { controllerId: string }) => {
     const isOn = 'isOn' in status ? (status.isOn ? 'On' : 'Off') : '-';
     const humidity = 'humidity' in status ? status.humidity : '-';
     const temperature = 'temperature' in status ? status.temperature : '-';
-    const fanSpeed = 'fanSpeed' in status ? (status.fanSpeed / 255 * 100).toFixed() : '-';
+    const fanSpeed = 'fanSpeed' in status ? Math.trunc(status.fanSpeed / 255 * 100) : '-';
 
     return (
         <div className="flex justify-between items-center gap-2 pt-0.5 cursor-pointer group relative grid auto-cols-fr grid-flow-col" onClick={updateState}>
