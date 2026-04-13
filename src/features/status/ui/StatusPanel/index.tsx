@@ -63,25 +63,25 @@ export const StatusPanel = ({ controllerId }: { controllerId: string }) => {
     const fanSpeed = 'fanSpeed' in status ? Math.trunc(status.fanSpeed / 255 * 100) : '-';
 
     return (
-        <div className="flex justify-between items-center gap-2 pt-0.5 cursor-pointer group relative grid auto-cols-fr grid-flow-col" onClick={updateState}>
+        <div className="grid auto-cols-fr grid-flow-col gap-2 pt-0.5 cursor-pointer group relative" onClick={updateState}>
             <Card className={status.isOn ? 'ring-2 ring-offset-2 ring-amber-500 text-amber-500' : ''}>
                 <Bulb />
-                <span className="text-black font-medium">{isOn}</span>
+                <span className="text-slate-800 font-medium">{isOn}</span>
             </Card>
 
             <Card>
                 <Drop />
-                <span className="text-black font-medium">{humidity}%</span>
+                <span className="text-slate-800 font-medium">{humidity}%</span>
             </Card>
 
             <Card className={hasTemperatureWarning ? 'ring-2 ring-offset-2 ring-orange-600 text-orange-600' : ''}>
                 <Temperature />
-                <span className="text-black font-medium">{temperature}℃</span>
+                <span className="text-slate-800 font-medium">{temperature}℃</span>
             </Card>
 
             <Card>
                 <Fan />
-                <span className="text-black font-medium">{fanSpeed}%</span>
+                <span className="text-slate-800 font-medium">{fanSpeed}%</span>
             </Card>
         </div>
     );

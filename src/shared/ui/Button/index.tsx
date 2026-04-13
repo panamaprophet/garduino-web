@@ -1,6 +1,6 @@
 import { MouseEventHandler, ReactNode } from 'react';
 
-const buttonClassList = 'transition-all cursor-pointer border-none rounded-lg p-2.5 text-sm font-medium';
+const buttonClassList = 'transition-all cursor-pointer border-none rounded-lg p-2.5 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500';
 
 const ButtonWidth = {
     full: 'w-full',
@@ -18,14 +18,16 @@ interface Props {
     disabled?: boolean;
     type?: 'button' | 'submit';
     theme?: keyof typeof ButtonTheme;
+    'aria-label'?: string;
     onClick: MouseEventHandler<HTMLButtonElement>;
 }
 
-export const Button = ({ children, onClick, disabled, width = 'auto', type = 'button', theme = 'primary' }: Props) => (
+export const Button = ({ children, onClick, disabled, width = 'auto', type = 'button', theme = 'primary', 'aria-label': ariaLabel }: Props) => (
     <button
         type={type}
         onClick={onClick}
         disabled={disabled}
+        aria-label={ariaLabel}
         className={`${buttonClassList} ${ButtonWidth[width]} ${ButtonTheme[theme]}`}
     >
         {children}

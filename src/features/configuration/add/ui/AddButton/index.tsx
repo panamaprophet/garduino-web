@@ -45,8 +45,8 @@ export const AddButton = () => {
 
     return (
         <div className="aspect-square">
-            <Button theme="secondary" onClick={onCreateController}>
-                <PlusIcon className="w-4 h-4 m-0.5 text-black" />
+            <Button theme="secondary" aria-label="Add controller" onClick={onCreateController}>
+                <PlusIcon className="w-4 h-4 m-0.5 text-slate-800" />
             </Button>
         </div>
     );

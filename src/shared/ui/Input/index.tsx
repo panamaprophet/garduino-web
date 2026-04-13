@@ -1,7 +1,10 @@
 import { HTMLInputTypeAttribute } from 'react';
 
-const inputClassList = 'bg-slate-100 text-slate-800 text-sm inset-shadow-2xs rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 appearance-none text-left font-normal';
+const commonClassList = 'bg-slate-100 inset-shadow-2xs rounded-lg outline-none w-full border-none accent-emerald-500 outline-none cursor-pointer appearance-none';
+const focusClassList = 'focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500';
 
+const inputClassList = `${commonClassList} ${focusClassList} text-slate-800 text-sm block w-full p-2.5 text-left font-normal`;
+const rangeClassList = `${commonClassList}`;
 
 interface Props<T,> {
     value: T;
@@ -27,7 +30,7 @@ export const Input = <T extends string | number>({ type = 'text', value, onChang
 
 export const InputRange = ({ value, onChange }: { value: number, onChange: (value: number) => void }) => (
     <input
-        className={`${inputClassList} p-0! accent-emerald-500`}
+        className={rangeClassList}
         value={value}
         type="range"
         max="100"
