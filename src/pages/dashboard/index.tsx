@@ -39,7 +39,7 @@ export const Dashboard = withAuth(() => {
     return (
         <div className="p-4 max-w-md mx-auto text-sm">
             <div className="flex flex-col gap-4">
-                <div className="flex items-center gap-3 border rounded-lg shadow-xs p-2.5">
+                <div className="flex items-center gap-3">
                     <button
                         onClick={goBack}
                         aria-label="Back to controllers"
@@ -47,8 +47,6 @@ export const Dashboard = withAuth(() => {
                     >
                         <ChevronLeft className="w-4 h-4" />
                     </button>
-
-                    <div className="h-5 w-px bg-slate-200" />
 
                     <span className="text-slate-800 font-medium truncate">
                         <span className="text-slate-400">ID:</span> {controllerId}
@@ -60,9 +58,7 @@ export const Dashboard = withAuth(() => {
                 <Tabs tabs={tabs} currentTab={tab} onClick={setTab} />
 
                 {tab === 'logs' && (
-                    <div className="mt-5">
-                        <ControllerHistoricalData controllerId={controllerId} />
-                    </div>
+                    <ControllerHistoricalData controllerId={controllerId} />
                 )}
 
                 {tab === 'configuration' && (
