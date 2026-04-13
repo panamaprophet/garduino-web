@@ -20,6 +20,8 @@ export const Chart = (props: Props) => {
     const { lines } = props;
     const { formatter = (value, label) => `${value} - ${label}` } = props;
 
+    const hasData = lines.length > 0 && lines.some((line) => line.values.length > 0);
+
     const xValues = lines.at(0)?.values.map(([value]) => value) ?? [];
     const yValues = lines.flatMap((line) => line.values.map(([, value]) => value));
 
@@ -104,53 +106,64 @@ export const Chart = (props: Props) => {
     };
 
     return (
-        <div className="w-full h-full">
-            <div className="relative flex h-full">
-                <div data-role="y-labels" className="w-6 relative">
-                    {yLabels}
+        <div className="w-full">
+            {!hasData && (
+                <div className="flex items-center justify-center min-h-[200px] text-sm text-gray-400">
+                    No data
                 </div>
+            )}
 
-                <div
-                    onMouseMove={onMouseMove}
-                    onMouseLeave={onMouseLeave}
-                    className="relative w-full h-full border-b border-[#191926]/8"
-                >
-                    <svg
-                        data-role="chart"
-                        preserveAspectRatio="none"
-                        viewBox={`${offset} 0 ${width - offset * 2} ${height}`}
-                    >
-                        {columns}
+            {hasData && (
+                <>
+                    <div className="relative flex min-h-[200px]">
+                        <div data-role="y-labels" className="w-6 relative">
+                            {yLabels}
+                        </div>
 
-                        {lines.map(((line) =>
-                            <Line
-                                key={line.label}
-                                values={line.values.map(([, value]) => value)}
-                                width={width}
-                                height={height}
-                                offset={offset}
-                                color={line.color}
-                            />
-                        ))}
-                    </svg>
+                        <div
+                            onMouseMove={onMouseMove}
+                            onMouseLeave={onMouseLeave}
+                            className="relative w-full border-b border-[#191926]/8"
+                        >
+                            <svg
+                                data-role="chart"
+                                className="w-full h-full"
+                                preserveAspectRatio="none"
+                                viewBox={`${offset} 0 ${width - offset * 2} ${height}`}
+                            >
+                                {columns}
 
-                    <div data-role="dots" className="absolute top-0 left-0 w-full h-full">
-                        {dots.map(([x, y, value, label, color], index) => (
-                            <Dot
-                                key={index}
-                                left={x}
-                                bottom={y}
-                                color={color}
-                                value={formatter(value, label)}
-                            />
-                        ))}
+                                {lines.map(((line) =>
+                                    <Line
+                                        key={line.label}
+                                        values={line.values.map(([, value]) => value)}
+                                        width={width}
+                                        height={height}
+                                        offset={offset}
+                                        color={line.color}
+                                    />
+                                ))}
+                            </svg>
+
+                            <div data-role="dots" className="absolute top-0 left-0 w-full h-full">
+                                {dots.map(([x, y, value, label, color], index) => (
+                                    <Dot
+                                        key={index}
+                                        left={x}
+                                        bottom={y}
+                                        color={color}
+                                        value={formatter(value, label)}
+                                    />
+                                ))}
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <div data-role="x-labels" className="relative left-3 w-full pt-4">
-                {xLabels}
-            </div>
+                    <div data-role="x-labels" className="relative left-3 w-full pt-4">
+                        {xLabels}
+                    </div>
+                </>
+            )}
         </div>
     );
 };
