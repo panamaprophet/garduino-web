@@ -1,5 +1,6 @@
 export { Arrows } from './Arrows';
 export { Bulb } from './Bulb';
+export { ChevronLeft } from './ChevronLeft';
 export { Drop } from './Drop';
 export { Fan } from './Fan';
 export { Leaf } from './Leaf';

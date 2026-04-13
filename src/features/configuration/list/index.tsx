@@ -1,1 +1,1 @@
-export { ControllerList } from './ui/ControllersList';
+export { ControllerList } from './ui/ControllerList';
