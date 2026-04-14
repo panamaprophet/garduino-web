@@ -7,7 +7,7 @@ import { Loader } from '@/shared/ui/Loader';
 import { Checkbox } from '@/shared/ui/Checkbox';
 import { formatTime } from '@/shared/lib/date';
 
-import { queries } from '@/entities/controller-event';
+import { ControllerEventType, queries } from '@/entities/controller-event';
 
 type Range = '1d' | '3d' | '7d';
 
@@ -34,7 +34,7 @@ export const ControllerHistoricalData = ({ controllerId }: { controllerId: strin
 
     const { data = [], isLoading } = useQuery(queries.historicalData(controllerId, startDate, endDate));
 
-    const updates = data.filter((item) => item.event === 'update').sort((a, b) => a.ts - b.ts);
+    const updates = data.filter((item) => item.event === ControllerEventType.Update).sort((a, b) => a.ts - b.ts);
 
     const humidity = {
         label: 'Humidity',

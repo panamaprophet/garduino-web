@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
+import { ControllerEventType } from '@/entities/controller-event';
 import { queries, getDownloadUrl } from '@/entities/firmware';
 import { formatDate } from '@/shared/lib/date';
 
@@ -34,20 +35,20 @@ export const FirmwareUpdatePanel = ({ controllerId, visibleCount = 3 }: { contro
         [`controllers/${controllerId}/events/pub`]: (data: Record<string, unknown>) => {
             const { event, message } = data;
 
-            if (event === 'firmware:update:started') {
+            if (event === ControllerEventType.FirmwareUpdateStarted) {
                 setUpdateStatus('started');
             }
 
-            if (event === 'firmware:update:success') {
+            if (event === ControllerEventType.FirmwareUpdateSuccess) {
                 setUpdateStatus('success');
             }
 
-            if (event === 'firmware:update:error') {
+            if (event === ControllerEventType.FirmwareUpdateError) {
                 setUpdateStatus('error');
                 setErrorMessage(String(message ?? 'Unknown error'));
             }
 
-            if (event === 'run') {
+            if (event === ControllerEventType.Run) {
                 setUpdateStatus('idle');
                 setErrorMessage(null);
             }

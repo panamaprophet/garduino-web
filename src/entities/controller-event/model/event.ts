@@ -1,5 +1,7 @@
+import { EventType } from './event-type';
+
 interface UpdateEvent {
-    event: 'update';
+    event: EventType.Update;
     ts: number;
     humidity: number;
     temperature: number;
@@ -7,20 +9,29 @@ interface UpdateEvent {
 }
 
 interface RunEvent {
-    event: 'run';
+    event: EventType.Run;
     ts: number;
     isOn: boolean;
 }
 
 interface SwitchEvent {
-    event: 'switch';
+    event: EventType.Switch;
     ts: number;
     isOn: boolean;
 }
 
 interface RebootEvent {
-    event: 'reboot';
+    event: EventType.Reboot;
     ts: number;
 }
 
-export type Event = UpdateEvent | RunEvent | SwitchEvent | RebootEvent;
+interface FirmwareUpdateEvent {
+    event:
+        | EventType.FirmwareUpdateStarted
+        | EventType.FirmwareUpdateSuccess
+        | EventType.FirmwareUpdateError
+        ;
+    ts: number;
+}
+
+export type Event = UpdateEvent | RunEvent | SwitchEvent | RebootEvent | FirmwareUpdateEvent;
