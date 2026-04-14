@@ -1,11 +1,20 @@
 import { useEffect, useState } from 'react';
 
+const getLocationHash = () => {
+    return globalThis.location?.hash.replace('#', '');
+};
 
-const getLocationHash = () => window.location.hash.replace('#', '');
+const setLocationHash = (hash: string) => { 
+    if (!globalThis.location) {
+        return;
+    }
 
-const setLocationHash = (hash: string) => { window.location.hash = hash; };
+    globalThis.location.hash = hash;
+};
 
-const getHashChangeEventValue = (event: HashChangeEvent) => event.newURL.split('#')[1] ?? '';
+const getHashChangeEventValue = (event: HashChangeEvent) => {
+    return event.newURL.split('#')[1] ?? '';
+};
 
 
 export const useLocationHash = () => {
