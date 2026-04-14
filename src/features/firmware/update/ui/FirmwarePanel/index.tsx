@@ -9,6 +9,7 @@ import { usePubSubClient } from '@/shared/pubsub';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Loader } from '@/shared/ui/Loader';
+import { Divider } from '@/shared/ui/Divider';
 
 type UpdateStatus = 'idle' | 'requesting' | 'started' | 'success' | 'error';
 
@@ -124,6 +125,8 @@ export const FirmwareUpdatePanel = ({ controllerId, visibleCount = 3 }: { contro
                     </Button>
                 )}
             </div>
+
+            <Divider />
 
             {updateStatus === 'error' && (
                 <p className="text-sm text-red-600">

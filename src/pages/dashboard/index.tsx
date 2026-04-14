@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Tabs } from '@/shared/ui/Tabs';
 import { withAuth } from '@/shared/auth';
 import { Button } from '@/shared/ui/Button';
+import { Divider } from '@/shared/ui/Divider';
 import { ChevronLeft } from '@/shared/ui/Icon';
 
 import { ControllerStatus } from '@/features/status';
@@ -19,7 +20,7 @@ import { useLocationHash } from './lib/useLocationHash';
 
 const tabs = {
     logs: [ControllerHistoricalData],
-    configuration: [ControllerEditForm, ControllerRebootButton],
+    configuration: [ControllerEditForm, Divider, ControllerRebootButton],
     firmware: [FirmwareUpdatePanel],
 };
 
@@ -39,6 +40,8 @@ export const Dashboard = withAuth(() => {
                     <ControllerAddButton />
                 </div>
 
+                <Divider />
+
                 <ControllerList onSelect={setLocationHash} />
             </Layout>
         );
@@ -57,15 +60,15 @@ export const Dashboard = withAuth(() => {
                 </Button>
 
                 <span className="text-slate-800 font-medium truncate">
-                    <span className="text-slate-400">ID:</span> {controllerId}
+                    <span className="text-slate-400 mr-0.5">ID:</span> {controllerId}
                 </span>
             </div>
 
-            <hr className="border-slate-200 my-4" />
+            <Divider />
 
             <ControllerStatus controllerId={controllerId} key={controllerId} />
 
-            <hr className="border-slate-200 my-4" />
+            <Divider />
 
             <Tabs tabs={[...Object.values(Tab)]} currentTab={tab} onClick={setTab} />
 
