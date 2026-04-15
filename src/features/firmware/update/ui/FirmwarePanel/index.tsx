@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { ControllerEventType } from '@/entities/controller-event';
 import { queries, getDownloadUrl } from '@/entities/firmware';
@@ -26,6 +26,7 @@ const buttonLabel: Record<UpdateStatus, string> = {
 
 export const FirmwareUpdatePanel = ({ controllerId, visibleCount = 3 }: { controllerId: string, visibleCount?: number }) => {
     const { data: firmwareList, isLoading } = useQuery(queries.list);
+    const { mutateAsync: getUrl } = useMutation({ mutationFn: getDownloadUrl });
 
     const [selectedKey, setSelectedKey] = useState<string | null>(null);
     const [updateStatus, setUpdateStatus] = useState<UpdateStatus>('idle');
@@ -73,7 +74,7 @@ export const FirmwareUpdatePanel = ({ controllerId, visibleCount = 3 }: { contro
         setUpdateStatus('requesting');
         setErrorMessage(null);
 
-        const { url, md5 } = await getDownloadUrl(selectedKey);
+        const { url, md5 } = await getUrl(selectedKey);
         const baseUrl = url.split('?').at(0);
 
         publish(`controllers/${controllerId}/firmware/update/sub`, { url: baseUrl, md5 });
