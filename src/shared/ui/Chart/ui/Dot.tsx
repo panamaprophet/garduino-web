@@ -24,7 +24,6 @@ export const Dot = ({ value, left, bottom, color = 'black' }: { left: number; bo
             px-1
             transition-opacity
             text-xs
-            text-gray-600
             text-current
             whitespace-nowrap
 

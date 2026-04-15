@@ -1,6 +1,8 @@
 import { MouseEventHandler, ReactNode } from 'react';
 
-const buttonClassList = 'transition-all cursor-pointer border-none rounded-lg p-2.5 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500';
+const outlineClassList = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-500';
+const disabledClassList = 'disabled:opacity-50 disabled:cursor-not-allowed';
+const buttonClassList = `transition-all cursor-pointer border-none rounded-lg p-2.5 text-sm font-medium ${outlineClassList} ${disabledClassList}`;
 
 const ButtonWidth = {
     full: 'w-full',

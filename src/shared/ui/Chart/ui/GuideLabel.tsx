@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 
 
-const commonClasses = 'absolute text-[#191926]/44 whitespace-nowrap';
+const commonClasses = 'absolute text-slate-800/45 whitespace-nowrap';
 
 const verticalClasses = 'w-7 text-xs text-left translate-y-1/2';
 

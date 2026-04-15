@@ -1,7 +1,7 @@
 import { MouseEventHandler, ReactNode, useState } from 'react';
 import { XLabel, YLabel } from './ui/GuideLabel';
 import { Line } from './ui/Line';
-import { GuideLine } from './ui/GuideLIne';
+import { GuideLine } from './ui/GuideLine';
 import { formatLabel } from './lib/formatLabel';
 import { Dot } from './ui/Dot';
 
@@ -123,7 +123,7 @@ export const Chart = (props: Props) => {
                         <div
                             onMouseMove={onMouseMove}
                             onMouseLeave={onMouseLeave}
-                            className="relative w-full border-b border-[#191926]/8"
+                            className="relative w-full border-b border-slate-800/8"
                         >
                             <svg
                                 data-role="chart"

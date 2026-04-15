@@ -1,6 +1,6 @@
 import { MouseEventHandler, ReactNode } from 'react';
 
-const classList = 'flex flex-col border p-3 grow shadow-xs gap-1 rounded-lg items-center cursor-pointer transition-all';
+const defaultClassList = 'flex flex-col border p-3 grow shadow-xs gap-1 rounded-lg items-center transition-all';
 
 interface Props {
     children: ReactNode;
@@ -8,8 +8,16 @@ interface Props {
     onClick?: MouseEventHandler;
 }
 
-export const Card = (props: Props) => (
-    <div className={`${classList} ${props.className}`} onClick={props.onClick}>
-        {props.children}
-    </div>
-);
+export const Card = ({ children, className, onClick }: Props) => {
+    const classList = `
+        ${defaultClassList}
+        ${onClick ? 'cursor-pointer' : ''}
+        ${className ?? ''}
+    `;
+
+    return (
+        <div className={classList} onClick={onClick}>
+            {children}
+        </div>
+    );
+};
