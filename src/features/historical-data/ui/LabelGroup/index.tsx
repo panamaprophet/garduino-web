@@ -24,16 +24,18 @@ export const LabelGroup = ({ items, currentItems, onChange }: Props) => {
                 const isActive = currentItems.includes(item.label);
                 const isDisabled = isActive && currentItems.length === 1;
 
+                const classList = `
+                    ${buttonClassList}
+                    ${isActive ? buttonActiveClassList : buttonInactiveClassList}
+                    ${isDisabled ? 'cursor-not-allowed pointer-events-none' : 'cursor-pointer'}
+                `;
+
                 return (
                     <button
                         key={item.label}
                         onClick={() => onChange(item.label)}
                         disabled={isDisabled}
-                        className={`
-                            ${buttonClassList}
-                            ${isActive ? buttonActiveClassList : buttonInactiveClassList}
-                            ${isDisabled ? 'cursor-not-allowed pointer-events-none' : 'cursor-pointer'}
-                        `}
+                        className={classList}
                     >
                         <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: item.color }} />
 

@@ -4,11 +4,11 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { Label } from '@/shared/ui/Label';
 import { Button } from '@/shared/ui/Button';
 import { Input, InputRange } from '@/shared/ui/Input';
-import { LightCyclePicker } from '@/shared/ui/LightCyclePicker';
 import { millisecondsToTime, timeToMilliseconds } from '@/shared/lib/date';
 
 import { queries, updateConfiguration } from '@/entities/controller-configuration';
 
+import { LightCyclePicker } from '../LightCyclePicker';
 import { Skeleton } from '../Skeleton';
 
 export const EditForm = ({ controllerId }: { controllerId: string }) => {

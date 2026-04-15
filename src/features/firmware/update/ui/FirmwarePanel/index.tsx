@@ -3,13 +3,15 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { ControllerEventType } from '@/entities/controller-event';
 import { queries, getDownloadUrl } from '@/entities/firmware';
-import { formatDate } from '@/shared/lib/date';
 
-import { usePubSubClient } from '@/shared/pubsub';
 import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Loader } from '@/shared/ui/Loader';
 import { Divider } from '@/shared/ui/Divider';
+
+import { formatDate } from '@/shared/lib/date';
+import { usePubSubClient } from '@/shared/pubsub';
+
 import { Skeleton } from '../Skeleton';
 
 type UpdateStatus = 'idle' | 'requesting' | 'started' | 'success' | 'error';
