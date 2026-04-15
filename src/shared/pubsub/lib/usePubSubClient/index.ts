@@ -2,11 +2,14 @@ import { useEffect } from 'react';
 import { ConnectionState } from '@aws-amplify/pubsub';
 import { getConnectionState, publish, subscribe } from '../../api';
 
-interface Topics {
-    [topic: string]: (data: Record<string, unknown>) => void;
-}
+type TopicCallback<T = any> = (data: T) => void;
 
-export const usePubSubClient = (topics: Topics = {}, options?: { onConnect: () => void }) => {
+type Topics = Record<string, TopicCallback>;
+
+export const usePubSubClient = <T extends Topics = {}>(
+    topics: T,
+    options?: { onConnect: () => void }
+) => {
     const hashKey = Object.keys(topics).sort().join('::');
 
     const connectionState = getConnectionState();

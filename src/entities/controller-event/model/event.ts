@@ -25,13 +25,22 @@ interface RebootEvent {
     ts: number;
 }
 
-interface FirmwareUpdateEvent {
-    event:
-        | EventType.FirmwareUpdateStarted
-        | EventType.FirmwareUpdateSuccess
-        | EventType.FirmwareUpdateError
-        ;
+interface FirmwareUpdateStartedEvent {
+    event: EventType.FirmwareUpdateStarted;
     ts: number;
 }
+
+interface FirmwareUpdateSuccessEvent {
+    event: EventType.FirmwareUpdateSuccess;
+    ts: number;
+}
+
+interface FirmwareUpdateErrorEvent {
+    event: EventType.FirmwareUpdateError;
+    ts: number;
+    message: string;
+}
+
+type FirmwareUpdateEvent = FirmwareUpdateStartedEvent | FirmwareUpdateSuccessEvent | FirmwareUpdateErrorEvent;
 
 export type Event = UpdateEvent | RunEvent | SwitchEvent | RebootEvent | FirmwareUpdateEvent;

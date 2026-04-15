@@ -31,16 +31,12 @@ export const StatusPanel = ({ controllerId }: { controllerId: string }) => {
     };
 
     const topics = {
-        [`controllers/${controllerId}/status/pub`]: (data: { [k: string]: unknown }) => {
-            const changes = data as unknown as ControllerStatus;
-
-            setStatus(status => ({ ...status, ...changes, lastUpdateOn: Date.now() }));
+        [`controllers/${controllerId}/status/pub`]: (data: ControllerStatus) => {
+            setStatus((status) => ({ ...status, ...data, lastUpdateOn: Date.now() }));
             setLoading(false);
         },
-        [`controllers/${controllerId}/events/pub`]: (data: { [k: string]: unknown }) => {
-            const changes = data as unknown as Pick<ControllerStatus, 'temperature' | 'humidity' | 'isOn'>
-
-            setStatus(status => ({ ...status, ...changes, lastUpdateOn: Date.now() }));
+        [`controllers/${controllerId}/events/pub`]: (data: Pick<ControllerStatus, 'temperature' | 'humidity' | 'isOn'>) => {
+            setStatus((status) => ({ ...status, ...data, lastUpdateOn: Date.now() }));
             setLoading(false);
         },
     };
