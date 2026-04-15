@@ -10,6 +10,7 @@ import { Card } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Loader } from '@/shared/ui/Loader';
 import { Divider } from '@/shared/ui/Divider';
+import { Skeleton } from '../Skeleton';
 
 type UpdateStatus = 'idle' | 'requesting' | 'started' | 'success' | 'error';
 
@@ -79,11 +80,7 @@ export const FirmwareUpdatePanel = ({ controllerId, visibleCount = 3 }: { contro
     };
 
     if (isLoading) {
-        return (
-            <div className="flex justify-between items-center p-7">
-                <Loader status="Loading firmware" />
-            </div>
-        );
+        return <Skeleton />;
     }
 
     if (!firmwareList?.length) {

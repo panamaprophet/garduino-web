@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { Label } from '@/shared/ui/Label';
-import { Loader } from '@/shared/ui/Loader';
 import { Button } from '@/shared/ui/Button';
 import { Input, InputRange } from '@/shared/ui/Input';
 import { LightCyclePicker } from '@/shared/ui/LightCyclePicker';
-
 import { millisecondsToTime, timeToMilliseconds } from '@/shared/lib/date';
 
 import { queries, updateConfiguration } from '@/entities/controller-configuration';
+
+import { Skeleton } from '../Skeleton';
 
 export const EditForm = ({ controllerId }: { controllerId: string }) => {
     const { data, refetch } = useQuery(queries.getConfiguration(controllerId));
@@ -18,11 +18,7 @@ export const EditForm = ({ controllerId }: { controllerId: string }) => {
     const [draft, setDraft] = useState<typeof data>();
 
     if (!data) {
-        return (
-            <div className="flex justify-between items-center p-7">
-                <Loader status="Loading configuration" />
-            </div>
-        );
+        return <Skeleton />;
     }
 
     const state = draft || data;

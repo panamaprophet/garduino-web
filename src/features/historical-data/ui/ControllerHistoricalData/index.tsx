@@ -3,11 +3,12 @@ import { useQuery } from '@tanstack/react-query';
 
 import { Tabs } from '@/shared/ui/Tabs';
 import { Chart } from '@/shared/ui/Chart';
-import { Loader } from '@/shared/ui/Loader';
-import { Checkbox } from '@/shared/ui/Checkbox';
 import { formatTime } from '@/shared/lib/date';
 
 import { ControllerEventType, queries } from '@/entities/controller-event';
+
+import { Skeleton } from '../Skeleton';
+import { LabelGroup } from '../LabelGroup';
 
 type Range = '1d' | '3d' | '7d';
 
@@ -48,7 +49,7 @@ export const ControllerHistoricalData = ({ controllerId }: { controllerId: strin
         color: 'oklch(59.6% 0.145 163.225)',
         values: updates.map<[string, number]>((item) => [formatTime(item.ts), item.temperature]),
         formatter: (value: number) => `${value}℃`,
-    }
+    };
 
     const fanSpeed = {
         label: 'Fan Speed',
@@ -74,30 +75,23 @@ export const ControllerHistoricalData = ({ controllerId }: { controllerId: strin
 
     return (
         <div className="flex flex-col gap-4 relative">
-            {isLoading && (
-                <Loader status="Loading logs" />
-            )}
+            <LabelGroup
+                items={lines}
+                currentItems={visibleLines}
+                onChange={setLineVisibility}
+            />
 
-            {!isLoading && (
-                <>
-                    <Tabs tabs={['1d', '3d', '7d']} currentTab={range} onClick={setRange} />
+            {
+                isLoading
+                    ? <Skeleton />
+                    : <Chart lines={chartLines} formatter={chartLabelFormatter} />
+            }
 
-                    <Chart lines={chartLines} formatter={chartLabelFormatter} />
-
-                    <div className="flex gap-3 mt-4">
-                        {lines.map((line) => (
-                            <label key={line.label} className="flex items-center gap-1.5" style={{ color: line.color }}>
-                                <Checkbox
-                                    onChange={() => setLineVisibility(line.label)}
-                                    checked={visibleLines.includes(line.label)}
-                                    disabled={visibleLines.includes(line.label) && visibleLines.length === 1}
-                                />
-                                {line.label}
-                            </label>
-                        ))}
-                    </div>
-                </>
-            )}
+            <Tabs
+                tabs={['1d', '3d', '7d']}
+                currentTab={range}
+                onClick={setRange}
+            />
         </div>
     );
 };

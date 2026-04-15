@@ -5,8 +5,8 @@ import { queries } from '@/entities/controller-configuration';
 import { ControllerStatus } from '@/entities/controller-status';
 
 import { Card } from '@/shared/ui/Card';
-import { Loader } from '@/shared/ui/Loader';
 import { Bulb, Drop, Fan, Temperature } from '@/shared/ui/Icon';
+import { Skeleton } from '../Skeleton';
 
 import { usePubSubClient } from '@/shared/pubsub';
 
@@ -50,11 +50,7 @@ export const StatusPanel = ({ controllerId }: { controllerId: string }) => {
     const hasTemperatureWarning = Boolean(status && configuration && (status.temperature > configuration.thresholdTemperature));
 
     if (!status || isLoading) {
-        return (
-            <div className="flex justify-between items-center p-7 cursor-pointer" onClick={updateState}>
-                <Loader status="Loading status" />
-            </div>
-        );
+        return <Skeleton />;
     }
 
     const isOn = 'isOn' in status ? (status.isOn ? 'On' : 'Off') : '-';
