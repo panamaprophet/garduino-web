@@ -8,7 +8,7 @@ export const LoginForm = ({ onSubmit }: { onSubmit: (credentials: { username: st
     const [isLoading, setLoading] = useState(false);
 
     return (
-        <form className="flex flex-col gap-4 p-4 max-w-md mx-auto justify-center h-full">
+        <form className="flex flex-col gap-4 p-4 max-w-sm mx-auto justify-center h-full">
             <Input
                 value={state.username}
                 onChange={username => setState({ ...state, username })}
