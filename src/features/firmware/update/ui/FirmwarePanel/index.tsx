@@ -110,7 +110,9 @@ export const FirmwareUpdatePanel = ({ controllerId, visibleCount = 3 }: { contro
                         }
                         onClick={() => setSelectedKey(item.key)}
                     >
-                        <span className="font-medium text-slate-800">{item.key}</span>
+                        <span className="font-medium text-slate-800 overflow-hidden text-ellipsis whitespace-nowrap max-w-full">
+                            {item.key}
+                        </span>
                         <span className="text-xs text-slate-400">
                             {formatDate(item.lastModified)} · {formatSize(item.size)}
                         </span>
