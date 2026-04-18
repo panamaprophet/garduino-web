@@ -10,18 +10,26 @@ import { Skeleton } from '../Skeleton';
 
 import { usePubSubClient } from '@/shared/pubsub';
 
-const defaultStatus: ControllerStatus = {
-    isOn: false,
-    humidity: 0,
-    temperature: 0,
-    fanSpeed: 0,
-    stabilityFactor: 0,
+type Status = Omit<ControllerStatus, 'event'>;
+
+const defaultStatus: Status = {
+    light: {
+        isOn: false,
+    },
+    fan: {
+        currentSpeed: 0,
+    },
+    sensor: {
+        humidity: 0,
+        temperature: 0,
+        stabilityFactor: 0,
+    },
 };
 
 export const StatusPanel = ({ controllerId }: { controllerId: string }) => {
     const { data: configuration } = useQuery(queries.getConfiguration(controllerId));
 
-    const [status, setStatus] = useState<ControllerStatus>(defaultStatus);
+    const [status, setStatus] = useState<Status>(defaultStatus);
 
     const [isLoading, setLoading] = useState(false);
 
@@ -35,7 +43,7 @@ export const StatusPanel = ({ controllerId }: { controllerId: string }) => {
             setStatus((status) => ({ ...status, ...data, lastUpdateOn: Date.now() }));
             setLoading(false);
         },
-        [`controllers/${controllerId}/events/pub`]: (data: Pick<ControllerStatus, 'temperature' | 'humidity' | 'isOn'>) => {
+        [`controllers/${controllerId}/events/pub`]: (data: ControllerStatus) => {
             setStatus((status) => ({ ...status, ...data, lastUpdateOn: Date.now() }));
             setLoading(false);
         },
@@ -43,20 +51,22 @@ export const StatusPanel = ({ controllerId }: { controllerId: string }) => {
 
     const [, publish] = usePubSubClient(topics, { onConnect: updateState });
 
-    const hasTemperatureWarning = Boolean(status && configuration && (status.temperature > configuration.thresholdTemperature));
+    const { fan, light, sensor } = status;
+    const { temperature, humidity } = sensor;
+    
+    const isOn = light.isOn ? 'On' : 'Off';
+    const fanSpeed = Math.trunc(fan.currentSpeed / 255 * 100);
+
+    const temperatureThreshold = configuration?.thresholdTemperature ?? Number.POSITIVE_INFINITY;
+    const hasTemperatureWarning = (temperature > temperatureThreshold);
 
     if (!status || isLoading) {
         return <Skeleton />;
     }
 
-    const isOn = 'isOn' in status ? (status.isOn ? 'On' : 'Off') : '-';
-    const humidity = 'humidity' in status ? status.humidity : '-';
-    const temperature = 'temperature' in status ? status.temperature : '-';
-    const fanSpeed = 'fanSpeed' in status ? Math.trunc(status.fanSpeed / 255 * 100) : '-';
-
     return (
         <div className="grid auto-cols-fr grid-flow-col gap-2 pt-0.5 cursor-pointer group relative" onClick={updateState}>
-            <Card className={status.isOn ? 'ring-2 ring-offset-2 ring-amber-500 text-amber-500' : ''}>
+            <Card className={light.isOn ? 'ring-2 ring-offset-2 ring-amber-500 text-amber-500' : ''}>
                 <Bulb />
                 <span className="text-slate-800 font-medium">{isOn}</span>
             </Card>
