@@ -1,11 +1,26 @@
 import { EventType } from './event-type';
 
-interface UpdateEvent {
+interface TelemetryV1Event {
     event: EventType.Update;
     ts: number;
     humidity: number;
     temperature: number;
     fanSpeed: number;
+}
+
+interface TelemetryV2Event {
+    fan?: {
+        currentSpeed: number;
+    };
+    light?: {
+        isOn: boolean;
+    };
+    sensor?: {
+        temperature: number;
+        humidity: number;
+        stabilityFactor: number;
+    };
+    event: EventType.Update;
 }
 
 interface RunEvent {
@@ -43,4 +58,6 @@ interface FirmwareUpdateErrorEvent {
 
 type FirmwareUpdateEvent = FirmwareUpdateStartedEvent | FirmwareUpdateSuccessEvent | FirmwareUpdateErrorEvent;
 
-export type Event = UpdateEvent | RunEvent | SwitchEvent | RebootEvent | FirmwareUpdateEvent;
+type TelemetryEvent = TelemetryV1Event | TelemetryV2Event;
+
+export type Event = TelemetryEvent | RunEvent | SwitchEvent | RebootEvent | FirmwareUpdateEvent;

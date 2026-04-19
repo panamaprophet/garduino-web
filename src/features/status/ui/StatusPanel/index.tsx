@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { queries } from '@/entities/controller-configuration';
-import { ControllerStatus } from '@/entities/controller-status';
+import { ControllerEvent } from '@/entities/controller-event';
 
 import { Card } from '@/shared/ui/Card';
 import { Bulb, Drop, Fan, Temperature } from '@/shared/ui/Icon';
@@ -10,9 +10,7 @@ import { Skeleton } from '../Skeleton';
 
 import { usePubSubClient } from '@/shared/pubsub';
 
-type Status = Omit<ControllerStatus, 'event'>;
-
-const defaultStatus: Status = {
+const defaultStatus = {
     light: {
         isOn: false,
     },
@@ -29,7 +27,7 @@ const defaultStatus: Status = {
 export const StatusPanel = ({ controllerId }: { controllerId: string }) => {
     const { data: configuration } = useQuery(queries.getConfiguration(controllerId));
 
-    const [status, setStatus] = useState<Status>(defaultStatus);
+    const [status, setStatus] = useState(defaultStatus);
 
     const [isLoading, setLoading] = useState(false);
 
@@ -39,13 +37,11 @@ export const StatusPanel = ({ controllerId }: { controllerId: string }) => {
     };
 
     const topics = {
-        [`controllers/${controllerId}/status/pub`]: (data: ControllerStatus) => {
-            setStatus((status) => ({ ...status, ...data, lastUpdateOn: Date.now() }));
-            setLoading(false);
-        },
-        [`controllers/${controllerId}/events/pub`]: (data: ControllerStatus) => {
-            setStatus((status) => ({ ...status, ...data, lastUpdateOn: Date.now() }));
-            setLoading(false);
+        [`controllers/${controllerId}/events/pub`]: (data: ControllerEvent) => {
+            if (data.event === 'update') {
+                setStatus((status) => ({ ...status, ...data, lastUpdateOn: Date.now() }));
+                setLoading(false);
+            }
         },
     };
 
@@ -53,7 +49,7 @@ export const StatusPanel = ({ controllerId }: { controllerId: string }) => {
 
     const { fan, light, sensor } = status;
     const { temperature, humidity } = sensor;
-    
+
     const isOn = light.isOn ? 'On' : 'Off';
     const fanSpeed = Math.trunc(fan.currentSpeed / 255 * 100);
 
