@@ -9,6 +9,8 @@ interface TelemetryV1Event {
 }
 
 interface TelemetryV2Event {
+    event: EventType.Update;
+    ts: number;
     fan?: {
         currentSpeed: number;
     };
@@ -20,7 +22,6 @@ interface TelemetryV2Event {
         humidity: number;
         stabilityFactor: number;
     };
-    event: EventType.Update;
 }
 
 interface RunEvent {

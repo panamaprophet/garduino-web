@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { queries } from '@/entities/controller-configuration';
-import { ControllerEvent } from '@/entities/controller-event';
+import { ControllerEvent, ControllerEventType } from '@/entities/controller-event';
 
 import { Card } from '@/shared/ui/Card';
 import { Bulb, Drop, Fan, Temperature } from '@/shared/ui/Icon';
@@ -28,7 +28,6 @@ export const StatusPanel = ({ controllerId }: { controllerId: string }) => {
     const { data: configuration } = useQuery(queries.getConfiguration(controllerId));
 
     const [status, setStatus] = useState(defaultStatus);
-
     const [isLoading, setLoading] = useState(false);
 
     const updateState = () => {
@@ -38,7 +37,7 @@ export const StatusPanel = ({ controllerId }: { controllerId: string }) => {
 
     const topics = {
         [`controllers/${controllerId}/events/pub`]: (data: ControllerEvent) => {
-            if (data.event === 'update') {
+            if (data.event === ControllerEventType.Update) {
                 setStatus((status) => ({ ...status, ...data, lastUpdateOn: Date.now() }));
                 setLoading(false);
             }
