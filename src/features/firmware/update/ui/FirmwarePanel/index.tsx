@@ -5,6 +5,7 @@ import { ControllerEvent, ControllerEventType } from '@/entities/controller-even
 import { queries, getDownloadUrl } from '@/entities/firmware';
 
 import { Card } from '@/shared/ui/Card';
+import { Check } from '@/shared/ui/Icon';
 import { Button } from '@/shared/ui/Button';
 import { Loader } from '@/shared/ui/Loader';
 import { Divider } from '@/shared/ui/Divider';
@@ -33,10 +34,14 @@ export const FirmwareUpdatePanel = ({ controllerId, visibleCount = 3 }: { contro
     const [selectedKey, setSelectedKey] = useState<string | null>(null);
     const [updateStatus, setUpdateStatus] = useState<UpdateStatus>('idle');
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [currentVersion, setCurrentVersion] = useState<string | null>(null);
 
     const [showAll, setShowAll] = useState(false);
 
     const topics = {
+        [`controllers/${controllerId}/firmware/version/pub`]: (data: { version: string }) => {
+            setCurrentVersion(data.version);
+        },
         [`controllers/${controllerId}/events/pub`]: (data: ControllerEvent) => {
             if (data.event === ControllerEventType.FirmwareUpdateStarted) {
                 setUpdateStatus('started');
@@ -58,7 +63,11 @@ export const FirmwareUpdatePanel = ({ controllerId, visibleCount = 3 }: { contro
         },
     };
 
-    const [isConnected, publish] = usePubSubClient(topics);
+    const requestVersion = () => {
+        publish(`controllers/${controllerId}/firmware/version/sub`);
+    };
+
+    const [isConnected, publish] = usePubSubClient(topics, { onConnect: requestVersion });
 
     const onDeploy = async () => {
         if (!selectedKey) {
@@ -98,6 +107,10 @@ export const FirmwareUpdatePanel = ({ controllerId, visibleCount = 3 }: { contro
     const isUpdating = updateStatus === 'requesting' || updateStatus === 'started';
     const isDisabled = !selectedKey || !isConnected || isUpdating;
 
+    // basically version matches the firmware name, but file extenstion needed
+    // @todo: review flow for consistent keys
+    const currentVersionKey = currentVersion ? `${currentVersion}.bin` : null;
+
     return (
         <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
@@ -105,8 +118,8 @@ export const FirmwareUpdatePanel = ({ controllerId, visibleCount = 3 }: { contro
                     <Card
                         key={item.key}
                         className={selectedKey === item.key
-                            ? 'items-start ring-2 ring-offset-2 ring-emerald-500'
-                            : 'items-start hover:border-slate-300'
+                            ? 'relative items-start ring-2 ring-offset-2 ring-emerald-500'
+                            : 'relative items-start hover:border-slate-300'
                         }
                         onClick={() => setSelectedKey(item.key)}
                     >
@@ -116,6 +129,14 @@ export const FirmwareUpdatePanel = ({ controllerId, visibleCount = 3 }: { contro
                         <span className="text-xs text-slate-400">
                             {formatDate(item.lastModified)} · {formatSize(item.size)}
                         </span>
+                        {currentVersionKey === item.key && (
+                            <Check className={`
+                                size-5
+                                absolute top-1/2 right-2 -translate-y-1/2
+                                text-slate-300/80
+                                transition-all transition-duration-300
+                            `} />
+                        )}
                     </Card>
                 ))}
 
