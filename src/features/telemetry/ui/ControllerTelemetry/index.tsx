@@ -5,12 +5,12 @@ import { Chart } from '@/shared/ui/Chart';
 
 import { Skeleton } from '../Skeleton';
 import { LabelGroup } from '../LabelGroup';
-import { useControllerHistoricalData } from '../../lib/useControllerHistoricalData';
+import { useControllerTelemetry } from '../../lib/useControllerTelemetry';
 import type { Range } from '../../model/range';
 
-export const ControllerHistoricalData = ({ controllerId }: { controllerId: string }) => {
+export const ControllerTelemetry = ({ controllerId }: { controllerId: string }) => {
     const [range, setRange] = useState<Range>('1d');
-    const { isLoading, data } = useControllerHistoricalData(controllerId, range);
+    const { isLoading, data } = useControllerTelemetry(controllerId, range);
 
     const [visibleLines, setVisibleLines] = useState(data.map((item) => item.label).slice(0, 1));
 

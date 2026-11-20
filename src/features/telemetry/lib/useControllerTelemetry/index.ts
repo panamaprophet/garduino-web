@@ -8,7 +8,7 @@ export type MetricData = Metric & {
     values: Array<[string, number]>;
 };
 
-export const useControllerHistoricalData = (controllerId: string, range: Range) => {
+export const useControllerTelemetry = (controllerId: string, range: Range) => {
     const { from, to, interval, formatLabel } = getRange(range);
 
     const { data: buckets = [], isLoading } = useQuery(queries.summary(controllerId, from, to, interval));

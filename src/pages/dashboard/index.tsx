@@ -14,7 +14,7 @@ import { FirmwareUpdatePanel } from '@/features/firmware';
 import { ControllerList } from '@/features/controller/list';
 import { ControllerAddButton } from '@/features/controller/add';
 import { ControllerSettingsForm } from '@/features/settings/edit';
-import { ControllerHistoricalData } from '@/features/historical-data';
+import { ControllerTelemetry } from '@/features/telemetry';
 
 import { Tab } from './model/tab';
 import { Layout } from './ui/Layout';
@@ -76,7 +76,7 @@ export const Dashboard = withAuth(() => {
     }
 
     const tabs: Record<Tab, ReactNode> = {
-        [Tab.Logs]: <ControllerHistoricalData controllerId={controllerId} />,
+        [Tab.Logs]: <ControllerTelemetry controllerId={controllerId} />,
         [Tab.Settings]: <ControllerSettingsForm controllerId={controllerId} />,
         [Tab.Firmware]: <FirmwareUpdatePanel controllerId={controllerId} />,
         [Tab.Device]: <DeviceTab controllerId={controllerId} onRemoved={onBack} />,
