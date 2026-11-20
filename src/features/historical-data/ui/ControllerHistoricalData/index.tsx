@@ -6,14 +6,11 @@ import { Chart } from '@/shared/ui/Chart';
 import { Skeleton } from '../Skeleton';
 import { LabelGroup } from '../LabelGroup';
 import { useControllerHistoricalData } from '../../lib/useControllerHistoricalData';
-import { getRange } from '../../lib/getRange';
 import type { Range } from '../../model/range';
 
 export const ControllerHistoricalData = ({ controllerId }: { controllerId: string }) => {
     const [range, setRange] = useState<Range>('1d');
-    const [startDate, endDate] = getRange(range);
-
-    const { isLoading, data } = useControllerHistoricalData(controllerId, startDate, endDate);
+    const { isLoading, data } = useControllerHistoricalData(controllerId, range);
 
     const [visibleLines, setVisibleLines] = useState(data.map((item) => item.label).slice(0, 1));
 
@@ -25,7 +22,7 @@ export const ControllerHistoricalData = ({ controllerId }: { controllerId: strin
         setVisibleLines(changes);
     };
 
-    const chartLines = data.filter((item) => visibleLines.includes(item.label));
+    const chartLines = data.filter((item) => visibleLines.includes(item.label) && item.values.length > 0);
     const chartLabelFormatter = (value: number, date: string | number) => `${date} - ${value}`;
 
     return (

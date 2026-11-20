@@ -32,14 +32,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Typecheck
+        run: npm run typecheck
+
       - name: Build the application
         env:
-          VITE_REGION: ${{ vars.VITE_REGION }}
-          VITE_WS_API: ${{ vars.VITE_WS_API }}
           VITE_API_URL: ${{ vars.VITE_API_URL }}
           VITE_COGNITO_USER_POOL_ID: ${{ vars.VITE_COGNITO_USER_POOL_ID }}
           VITE_COGNITO_USER_POOL_CLIENT_ID: ${{ vars.VITE_COGNITO_USER_POOL_CLIENT_ID }}
-          VITE_COGNITO_IDENTITY_POOL_ID: ${{ vars.VITE_COGNITO_IDENTITY_POOL_ID }}
         run: npm run build
 
       - name: Setup Pages

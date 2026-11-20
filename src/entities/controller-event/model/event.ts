@@ -1,64 +1,66 @@
-import { EventType } from './event-type';
-
-interface TelemetryV1Event {
-    event: EventType.Update;
-    ts: number;
-    humidity: number;
-    temperature: number;
-    fanSpeed: number;
-}
-
-interface TelemetryV2Event {
-    event: EventType.Update;
-    ts: number;
-    fan?: {
-        currentSpeed: number;
-    };
-    light?: {
-        isOn: boolean;
-    };
-    sensor?: {
-        temperature: number;
-        humidity: number;
-        stabilityFactor: number;
-    };
-}
-
-interface RunEvent {
-    event: EventType.Run;
-    ts: number;
+export interface LightState {
     isOn: boolean;
 }
 
-interface SwitchEvent {
-    event: EventType.Switch;
-    ts: number;
-    isOn: boolean;
+export interface FanState {
+    speed: number;
 }
 
-interface RebootEvent {
-    event: EventType.Reboot;
-    ts: number;
+export type SensorState =
+    | { temperature: number, humidity: number, stabilityFactor: number }
+    | { error: string };
+
+export interface ModuleStates {
+    light?: LightState;
+    fan?: FanState;
+    sensor?: SensorState;
 }
 
-interface FirmwareUpdateStartedEvent {
-    event: EventType.FirmwareUpdateStarted;
-    ts: number;
+export type ModuleName = keyof ModuleStates;
+
+interface BaseEvent<TType extends string, TData> {
+    id: string;
+    type: TType;
+    ts: string;
+    data: TData;
 }
 
-interface FirmwareUpdateSuccessEvent {
-    event: EventType.FirmwareUpdateSuccess;
-    ts: number;
-}
+export type TelemetryEvent = BaseEvent<'telemetry', ModuleStates>;
 
-interface FirmwareUpdateErrorEvent {
-    event: EventType.FirmwareUpdateError;
-    ts: number;
-    message: string;
-}
+export type LightChangeEvent = BaseEvent<'light:change', { light: LightState }>;
 
-type FirmwareUpdateEvent = FirmwareUpdateStartedEvent | FirmwareUpdateSuccessEvent | FirmwareUpdateErrorEvent;
+export type FanChangeEvent = BaseEvent<'fan:change', { fan: FanState }>;
 
-type TelemetryEvent = TelemetryV1Event | TelemetryV2Event;
+export type SensorChangeEvent = BaseEvent<'sensor:change', { sensor: SensorState }>;
 
-export type Event = TelemetryEvent | RunEvent | SwitchEvent | RebootEvent | FirmwareUpdateEvent;
+export type BootEvent = BaseEvent<'boot', {
+    firmwareVersion: string;
+    protocolVersion: number;
+    modules: string[];
+    resetReason: string;
+}>;
+
+export type ConnectionEvent = BaseEvent<'connection', { online: boolean, reason?: string }>;
+
+export type SettingsAppliedEvent = BaseEvent<'settings:applied', Record<string, never>>;
+
+export type FirmwareUpdateEvent = BaseEvent<'firmware:update', {
+    status: 'started' | 'success' | 'error';
+    message?: string;
+}>;
+
+export type Event =
+    | TelemetryEvent
+    | LightChangeEvent
+    | FanChangeEvent
+    | SensorChangeEvent
+    | BootEvent
+    | ConnectionEvent
+    | SettingsAppliedEvent
+    | FirmwareUpdateEvent;
+
+export type EventType = Event['type'];
+
+export type LatestEvents = {
+    [E in Event as E['type']]?: E;
+};

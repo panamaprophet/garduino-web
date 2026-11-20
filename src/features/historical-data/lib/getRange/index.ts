@@ -1,18 +1,32 @@
+import type { SummaryInterval } from '@/entities/controller-event';
+import { DAY_IN_MILLISECONDS, formatDayTime, formatTime, type Instant } from '@/shared/lib/date';
 import type { Range } from '../../model/range';
 
-export const getRange = (range: Range): [from: number, to: number] => {
-    const dayInMilliseconds = 24 * 60 * 60 * 1000;
+interface RangeConfig {
+    durationMs: number;
+    interval: SummaryInterval;
+    intervalMs: number;
+    formatLabel: (ts: Instant) => string;
+}
 
-    const now = Date.now();
+const HOUR_IN_MILLISECONDS = 60 * 60 * 1000;
 
-    const start = now - (now % dayInMilliseconds);
-    const end = start + dayInMilliseconds;
+const config: Record<Range, RangeConfig> = {
+    '1d': { durationMs: DAY_IN_MILLISECONDS, interval: '10m', intervalMs: HOUR_IN_MILLISECONDS / 6, formatLabel: formatTime },
+    '3d': { durationMs: 3 * DAY_IN_MILLISECONDS, interval: '1h', intervalMs: HOUR_IN_MILLISECONDS, formatLabel: formatDayTime },
+    '7d': { durationMs: 7 * DAY_IN_MILLISECONDS, interval: '1h', intervalMs: HOUR_IN_MILLISECONDS, formatLabel: formatDayTime },
+};
 
-    const map: Record<Range, [from: number, to: number]> = {
-        '1d': [start - 1 * dayInMilliseconds, end],
-        '3d': [start - 3 * dayInMilliseconds, end],
-        '7d': [start - 7 * dayInMilliseconds, end],
+export const getRange = (range: Range, now = Date.now()) => {
+    const { durationMs, interval, intervalMs, formatLabel } = config[range];
+
+    const to = Math.ceil(now / intervalMs) * intervalMs;
+    const from = to - durationMs;
+
+    return {
+        from: new Date(from).toISOString(),
+        to: new Date(to).toISOString(),
+        interval,
+        formatLabel,
     };
-
-    return map[range];
 };

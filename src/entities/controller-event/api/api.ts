@@ -1,20 +1,15 @@
-import { ControllerEvent } from '@/entities/controller-event';
 import { sendRequest } from '@/shared/api/client';
+import type { LatestEvents } from '../model/event';
+import type { SummaryBucket, SummaryInterval } from '../model/summary';
 
-export const getControllerHistoricalData = (
-    controllerId: string,
-    options: { startDate?: number, endDate?: number } = {}
-) => {
-    const searchParams = new URLSearchParams();
-    const { startDate, endDate } = options;
+export const getLatestEvents = async (controllerId: string) => {
+    const { data } = await sendRequest<LatestEvents>(`/v2/controllers/${controllerId}/telemetry/latest`);
 
-    if (startDate) {
-        searchParams.append('startDate', startDate.toString());
-    }
+    return data;
+};
 
-    if (endDate) {
-        searchParams.append('endDate', endDate.toString());
-    }
+export const getSummary = async (controllerId: string, query: { from: string, to: string, interval: SummaryInterval }) => {
+    const { data } = await sendRequest<SummaryBucket[]>(`/v2/controllers/${controllerId}/telemetry/summary`, { query });
 
-    return sendRequest<ControllerEvent[]>(`/v1/controllers/${controllerId}/data?${searchParams}`);
+    return data;
 };

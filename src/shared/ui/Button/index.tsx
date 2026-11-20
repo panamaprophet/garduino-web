@@ -12,6 +12,7 @@ const ButtonWidth = {
 const ButtonTheme = {
     primary: 'bg-emerald-500 hover:bg-emerald-600 text-white',
     secondary: 'bg-slate-100 hover:bg-slate-200 text-slate-800',
+    danger: 'bg-red-50 hover:bg-red-100 text-red-600',
 };
 
 interface Props { 

@@ -1,3 +1,3 @@
-export type { Firmware, FirmwareVersion } from './model/firmware';
+export type { Firmware } from './model/firmware';
 export { queries } from './api/queries';
-export { getDownloadUrl } from './api/api';
+export { matchesVersion } from './lib/matchesVersion';
