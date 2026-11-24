@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-import { ControllerEvent, ControllerEventType } from '@/entities/controller-event';
-import { queries, getDownloadUrl } from '@/entities/firmware';
+import { sendCommand } from '@/entities/controller';
+import { queries, matchesVersion, type Firmware } from '@/entities/firmware';
+import { isOnline, useLatestEvents } from '@/entities/telemetry';
 
 import { Card } from '@/shared/ui/Card';
 import { Check } from '@/shared/ui/Icon';
@@ -11,66 +12,52 @@ import { Loader } from '@/shared/ui/Loader';
 import { Divider } from '@/shared/ui/Divider';
 
 import { formatDate } from '@/shared/lib/date';
-import { usePubSubClient } from '@/shared/pubsub';
+import { getErrorMessage } from '@/shared/api/client';
 
 import { Skeleton } from '../Skeleton';
 
-type UpdateStatus = 'idle' | 'requesting' | 'started' | 'success' | 'error';
-
 const formatSize = (bytes: number) => `${(bytes / 1024).toFixed(0)} KB`;
 
-const buttonLabel: Record<UpdateStatus, string> = {
-    idle: 'Deploy',
+const progressLabel = {
     requesting: 'Requesting update',
+    sent: 'Waiting for the controller',
     started: 'Downloading firmware',
     success: 'Rebooting controller',
-    error: 'Update failed',
+};
+
+type UpdateStatus = 'started' | 'success' | 'error';
+
+const getProgress = ({ isSending, isAwaiting, status }: { isSending: boolean, isAwaiting: boolean, status: UpdateStatus | undefined }) => {
+    if (isSending) {
+        return 'requesting';
+    }
+
+    if (!isAwaiting || status === 'error') {
+        return null;
+    }
+
+    return status ?? 'sent';
 };
 
 export const FirmwareUpdatePanel = ({ controllerId, visibleCount = 3 }: { controllerId: string, visibleCount?: number }) => {
     const { data: firmwareList, isLoading } = useQuery(queries.list);
-    const { mutateAsync: getUrl } = useMutation({ mutationFn: getDownloadUrl });
 
-    const [selectedKey, setSelectedKey] = useState<string | null>(null);
-    const [updateStatus, setUpdateStatus] = useState<UpdateStatus>('idle');
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [currentVersion, setCurrentVersion] = useState<string | null>(null);
+    const latest = useLatestEvents(controllerId, {
+        timeoutMs: 5 * 60 * 1000,
+        until: (newEvent) => Boolean(newEvent('boot')) || newEvent('firmware:update')?.data.status === 'error',
+    });
 
+    const { mutate: deploy, isPending: isSending, error: sendError } = useMutation({
+        mutationFn: sendCommand,
+        onMutate: latest.startAwaiting,
+        onError: latest.reset,
+    });
+
+    const [selected, setSelected] = useState<Firmware | null>(null);
     const [showAll, setShowAll] = useState(false);
 
-    const topics = {
-        [`controllers/${controllerId}/firmware/version/pub`]: (data: { version: string }) => {
-            setCurrentVersion(data.version);
-        },
-        [`controllers/${controllerId}/events/pub`]: (data: ControllerEvent) => {
-            if (data.event === ControllerEventType.FirmwareUpdateStarted) {
-                setUpdateStatus('started');
-            }
-
-            if (data.event === ControllerEventType.FirmwareUpdateSuccess) {
-                setUpdateStatus('success');
-            }
-
-            if (data.event === ControllerEventType.FirmwareUpdateError) {
-                setUpdateStatus('error');
-                setErrorMessage(data.message ?? 'Unknown error');
-            }
-
-            if (data.event === ControllerEventType.Run) {
-                setUpdateStatus('idle');
-                setErrorMessage(null);
-            }
-        },
-    };
-
-    const requestVersion = () => {
-        publish(`controllers/${controllerId}/firmware/version/sub`);
-    };
-
-    const [isConnected, publish] = usePubSubClient(topics, { onConnect: requestVersion });
-
-    const onDeploy = async () => {
-        if (!selectedKey) {
+    const onDeploy = () => {
+        if (!selected) {
             return;
         }
 
@@ -80,13 +67,10 @@ export const FirmwareUpdatePanel = ({ controllerId, visibleCount = 3 }: { contro
             return;
         }
 
-        setUpdateStatus('requesting');
-        setErrorMessage(null);
-
-        const { url, md5 } = await getUrl(selectedKey);
-        const baseUrl = url.split('?').at(0);
-
-        publish(`controllers/${controllerId}/firmware/update/sub`, { url: baseUrl, md5 });
+        deploy({
+            controllerId,
+            command: { type: 'firmware.update', firmwareKey: selected.key, md5: selected.md5 },
+        });
     };
 
     if (isLoading) {
@@ -101,15 +85,19 @@ export const FirmwareUpdatePanel = ({ controllerId, visibleCount = 3 }: { contro
         );
     }
 
+    const online = latest.data ? isOnline(latest.data) : false;
+    const currentVersion = latest.data?.boot?.data.firmwareVersion ?? null;
+
+    const update = latest.newEvent('firmware:update');
+    const isRebooted = Boolean(latest.newEvent('boot'));
+    const isFailed = update?.data.status === 'error';
+
+    const progress = getProgress({ isSending, isAwaiting: latest.isAwaiting, status: update?.data.status });
+
+    const isDisabled = !selected || !online || progress !== null;
+
     const visibleList = showAll ? firmwareList : firmwareList.slice(0, visibleCount);
     const hasMore = firmwareList.length > visibleCount;
-
-    const isUpdating = updateStatus === 'requesting' || updateStatus === 'started';
-    const isDisabled = !selectedKey || !isConnected || isUpdating;
-
-    // basically version matches the firmware name, but file extenstion needed
-    // @todo: review flow for consistent keys
-    const currentVersionKey = currentVersion ? `${currentVersion}.bin` : null;
 
     return (
         <div className="flex flex-col gap-4">
@@ -117,19 +105,19 @@ export const FirmwareUpdatePanel = ({ controllerId, visibleCount = 3 }: { contro
                 {visibleList.map((item) => (
                     <Card
                         key={item.key}
-                        className={selectedKey === item.key
+                        className={selected?.key === item.key
                             ? 'relative items-start ring-2 ring-offset-2 ring-emerald-500'
                             : 'relative items-start hover:border-slate-300'
                         }
-                        onClick={() => setSelectedKey(item.key)}
+                        onClick={() => setSelected(item)}
                     >
-                        <span className="font-medium text-slate-800 overflow-hidden text-ellipsis whitespace-nowrap max-w-full">
+                        <span className="font-medium text-slate-800 overflow-hidden text-ellipsis whitespace-nowrap max-w-full pr-6">
                             {item.key}
                         </span>
                         <span className="text-xs text-slate-400">
                             {formatDate(item.lastModified)} · {formatSize(item.size)}
                         </span>
-                        {currentVersionKey === item.key && (
+                        {currentVersion && matchesVersion(item, currentVersion) && (
                             <Check className={`
                                 size-5
                                 absolute top-1/2 right-2 -translate-y-1/2
@@ -149,10 +137,30 @@ export const FirmwareUpdatePanel = ({ controllerId, visibleCount = 3 }: { contro
 
             <Divider />
 
-            {updateStatus === 'error' && (
+            {currentVersion && (
+                <p className="text-xs text-slate-400">Running firmware {currentVersion}</p>
+            )}
+
+            {!online && (
+                <p className="text-xs text-slate-400">The controller is offline, updates can't be delivered</p>
+            )}
+
+            {isFailed && (
                 <p className="text-sm text-red-600">
-                    {errorMessage ?? 'Unknown error'}
+                    Update failed: {update.data.message ?? 'Unknown error'}
                 </p>
+            )}
+
+            {latest.isTimedOut && (
+                <p className="text-sm text-red-600">The controller didn't report the update result</p>
+            )}
+
+            {isRebooted && !isFailed && (
+                <p className="text-sm text-emerald-600">Controller restarted with firmware {currentVersion}</p>
+            )}
+
+            {sendError && (
+                <p className="text-sm text-red-600">{getErrorMessage(sendError)}</p>
             )}
 
             <Button
@@ -160,10 +168,7 @@ export const FirmwareUpdatePanel = ({ controllerId, visibleCount = 3 }: { contro
                 onClick={onDeploy}
                 disabled={isDisabled}
             >
-                {isUpdating && <Loader status={buttonLabel[updateStatus]} />}
-                {updateStatus === 'success' && buttonLabel[updateStatus]}
-                {updateStatus === 'error' && buttonLabel[updateStatus]}
-                {updateStatus === 'idle' && buttonLabel[updateStatus]}
+                {progress ? <Loader status={progressLabel[progress]} /> : 'Deploy'}
             </Button>
         </div>
     );

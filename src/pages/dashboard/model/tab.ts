@@ -1,5 +1,6 @@
 export enum Tab {
-    Logs = 'logs',
-    Configuration = 'configuration',
+    Telemetry = 'telemetry',
+    Settings = 'settings',
     Firmware = 'firmware',
+    Controller = 'controller',
 };
