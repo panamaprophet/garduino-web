@@ -3,7 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 
 import { sendCommand } from '@/entities/controller';
 import { queries, matchesVersion, type Firmware } from '@/entities/firmware';
-import { getNewEvent, hasNewEvent, isOnline, useLatestEvents, type LatestEvents } from '@/entities/controller-event';
+import { isOnline, useLatestEvents } from '@/entities/telemetry';
 
 import { Card } from '@/shared/ui/Card';
 import { Check } from '@/shared/ui/Icon';
@@ -16,49 +16,27 @@ import { getErrorMessage } from '@/shared/api/client';
 
 import { Skeleton } from '../Skeleton';
 
-type UpdateStatus = 'idle' | 'requesting' | 'sent' | 'started' | 'success' | 'done' | 'error' | 'timeout';
-
 const formatSize = (bytes: number) => `${(bytes / 1024).toFixed(0)} KB`;
 
-const buttonLabel: Record<UpdateStatus, string> = {
-    idle: 'Deploy',
+const progressLabel = {
     requesting: 'Requesting update',
     sent: 'Waiting for the controller',
     started: 'Downloading firmware',
     success: 'Rebooting controller',
-    done: 'Deploy',
-    error: 'Deploy',
-    timeout: 'Deploy',
 };
 
-const progressStatuses: UpdateStatus[] = ['requesting', 'sent', 'started', 'success'];
+type UpdateStatus = 'started' | 'success' | 'error';
 
-const isUpdateSettled = (events: LatestEvents, snapshot: LatestEvents) => {
-    const update = getNewEvent(events, snapshot, 'firmware:update');
-
-    return hasNewEvent(events, snapshot, 'boot') || update?.data.status === 'error';
-};
-
-const getUpdateStatus = (events: LatestEvents | undefined, snapshot: LatestEvents | null, isPending: boolean): UpdateStatus => {
-    if (!events || !snapshot) {
-        return 'idle';
+const getProgress = ({ isSending, isAwaiting, status }: { isSending: boolean, isAwaiting: boolean, status: UpdateStatus | undefined }) => {
+    if (isSending) {
+        return 'requesting';
     }
 
-    const update = getNewEvent(events, snapshot, 'firmware:update');
-
-    if (update?.data.status === 'error') {
-        return 'error';
+    if (!isAwaiting || status === 'error') {
+        return null;
     }
 
-    if (hasNewEvent(events, snapshot, 'boot')) {
-        return 'done';
-    }
-
-    if (update) {
-        return update.data.status;
-    }
-
-    return isPending ? 'sent' : 'timeout';
+    return status ?? 'sent';
 };
 
 export const FirmwareUpdatePanel = ({ controllerId, visibleCount = 3 }: { controllerId: string, visibleCount?: number }) => {
@@ -66,7 +44,7 @@ export const FirmwareUpdatePanel = ({ controllerId, visibleCount = 3 }: { contro
 
     const latest = useLatestEvents(controllerId, {
         timeoutMs: 5 * 60 * 1000,
-        isSettled: isUpdateSettled,
+        until: (newEvent) => Boolean(newEvent('boot')) || newEvent('firmware:update')?.data.status === 'error',
     });
 
     const { mutate: deploy, isPending: isSending, error: sendError } = useMutation({
@@ -107,14 +85,16 @@ export const FirmwareUpdatePanel = ({ controllerId, visibleCount = 3 }: { contro
         );
     }
 
-    const events = latest.data;
-    const online = events ? isOnline(events) : false;
-    const currentVersion = events?.boot?.data.firmwareVersion ?? null;
-    const updateError = events && latest.snapshot ? getNewEvent(events, latest.snapshot, 'firmware:update') : undefined;
+    const online = latest.data ? isOnline(latest.data) : false;
+    const currentVersion = latest.data?.boot?.data.firmwareVersion ?? null;
 
-    const updateStatus = isSending ? 'requesting' : getUpdateStatus(events, latest.snapshot, latest.isPending);
-    const isUpdating = progressStatuses.includes(updateStatus);
-    const isDisabled = !selected || !online || isUpdating;
+    const update = latest.newEvent('firmware:update');
+    const isRebooted = Boolean(latest.newEvent('boot'));
+    const isFailed = update?.data.status === 'error';
+
+    const progress = getProgress({ isSending, isAwaiting: latest.isAwaiting, status: update?.data.status });
+
+    const isDisabled = !selected || !online || progress !== null;
 
     const visibleList = showAll ? firmwareList : firmwareList.slice(0, visibleCount);
     const hasMore = firmwareList.length > visibleCount;
@@ -165,17 +145,17 @@ export const FirmwareUpdatePanel = ({ controllerId, visibleCount = 3 }: { contro
                 <p className="text-xs text-slate-400">The controller is offline, updates can't be delivered</p>
             )}
 
-            {updateStatus === 'error' && (
+            {isFailed && (
                 <p className="text-sm text-red-600">
-                    Update failed: {updateError?.data.message ?? 'Unknown error'}
+                    Update failed: {update.data.message ?? 'Unknown error'}
                 </p>
             )}
 
-            {updateStatus === 'timeout' && (
+            {latest.isTimedOut && (
                 <p className="text-sm text-red-600">The controller didn't report the update result</p>
             )}
 
-            {updateStatus === 'done' && (
+            {isRebooted && !isFailed && (
                 <p className="text-sm text-emerald-600">Controller restarted with firmware {currentVersion}</p>
             )}
 
@@ -188,7 +168,7 @@ export const FirmwareUpdatePanel = ({ controllerId, visibleCount = 3 }: { contro
                 onClick={onDeploy}
                 disabled={isDisabled}
             >
-                {isUpdating ? <Loader status={buttonLabel[updateStatus]} /> : buttonLabel[updateStatus]}
+                {progress ? <Loader status={progressLabel[progress]} /> : 'Deploy'}
             </Button>
         </div>
     );

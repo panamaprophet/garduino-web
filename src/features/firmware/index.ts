@@ -1,1 +1,0 @@
-export { FirmwareUpdatePanel } from './update';

@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { getDeviceFiles, rotateCertificate } from '@/entities/controller';
+import { getCertificateFiles, rotateCertificate } from '@/entities/controller';
 import { getErrorMessage } from '@/shared/api/client';
 import { download } from '@/shared/lib/download';
 import { Button } from '@/shared/ui/Button';
@@ -7,7 +7,7 @@ import { Button } from '@/shared/ui/Button';
 export const RotateCertificateButton = ({ controllerId }: { controllerId: string }) => {
     const { mutate: rotate, isPending } = useMutation({
         mutationFn: rotateCertificate,
-        onSuccess: (result) => getDeviceFiles(result).forEach(download),
+        onSuccess: ({ certificates }) => getCertificateFiles(certificates).forEach(download),
         onError: (error) => alert(`Failed to rotate the certificate: ${getErrorMessage(error)}`),
     });
 

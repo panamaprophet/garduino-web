@@ -9,21 +9,21 @@ import { ChevronLeft } from '@/shared/ui/Icon';
 
 import { queries } from '@/entities/controller';
 
-import { ControllerStatus } from '@/features/status';
-import { FirmwareUpdatePanel } from '@/features/firmware';
 import { ControllerList } from '@/features/controller/list';
-import { ControllerAddButton } from '@/features/controller/add';
-import { ControllerSettingsForm } from '@/features/settings/edit';
-import { ControllerTelemetry } from '@/features/telemetry';
+import { ControllerCreateButton } from '@/features/controller/create';
+import { ControllerSettingsForm } from '@/features/settings/update';
+import { FirmwareUpdatePanel } from '@/features/firmware/update';
+import { ControllerStatus } from '@/features/telemetry/latest';
+import { ControllerTelemetry } from '@/features/telemetry/summary';
 
 import { Tab } from './model/tab';
 import { Layout } from './ui/Layout';
-import { DeviceTab } from './ui/DeviceTab';
+import { ControllerTab } from './ui/ControllerTab';
 import { useLocationHash } from './lib/useLocationHash';
 
 export const Dashboard = withAuth(() => {
     const [controllerId, setLocationHash] = useLocationHash();
-    const [tab, setTab] = useState<Tab>(Tab.Logs);
+    const [tab, setTab] = useState<Tab>(Tab.Telemetry);
 
     const { data: controller, isError } = useQuery({ ...queries.get(controllerId), enabled: Boolean(controllerId) });
 
@@ -34,7 +34,7 @@ export const Dashboard = withAuth(() => {
             <Layout>
                 <div className="flex justify-between items-center">
                     <h1 className="text-lg font-semibold text-slate-800">Controllers</h1>
-                    <ControllerAddButton onCreated={setLocationHash} />
+                    <ControllerCreateButton onCreated={setLocationHash} />
                 </div>
 
                 <Divider />
@@ -76,10 +76,10 @@ export const Dashboard = withAuth(() => {
     }
 
     const tabs: Record<Tab, ReactNode> = {
-        [Tab.Logs]: <ControllerTelemetry controllerId={controllerId} />,
+        [Tab.Telemetry]: <ControllerTelemetry controllerId={controllerId} />,
         [Tab.Settings]: <ControllerSettingsForm controllerId={controllerId} />,
         [Tab.Firmware]: <FirmwareUpdatePanel controllerId={controllerId} />,
-        [Tab.Device]: <DeviceTab controllerId={controllerId} onRemoved={onBack} />,
+        [Tab.Controller]: <ControllerTab controllerId={controllerId} onRemoved={onBack} />,
     };
 
     return (

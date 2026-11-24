@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { queries, type Controller } from '@/entities/controller';
-import { getLastSeen, isOnline, useLatestEvents } from '@/entities/controller-event';
+import { getLastSeen, isOnline, useLatestEvents } from '@/entities/telemetry';
 import { formatTimeAgo } from '@/shared/lib/date';
 import { Card } from '@/shared/ui/Card';
 import { Skeleton } from '../Skeleton';

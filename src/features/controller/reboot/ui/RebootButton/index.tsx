@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { sendCommand } from '@/entities/controller';
-import { hasNewEvent, useLatestEvents } from '@/entities/controller-event';
+import { useLatestEvents } from '@/entities/telemetry';
 import { getErrorMessage } from '@/shared/api/client';
 import { Button } from '@/shared/ui/Button';
 import { Loader } from '@/shared/ui/Loader';
@@ -8,7 +8,7 @@ import { Loader } from '@/shared/ui/Loader';
 export const RebootButton = ({ controllerId }: { controllerId: string }) => {
     const latest = useLatestEvents(controllerId, {
         timeoutMs: 60 * 1000,
-        isSettled: (events, snapshot) => hasNewEvent(events, snapshot, 'boot'),
+        until: (newEvent) => Boolean(newEvent('boot')),
     });
 
     const { mutate: reboot, isPending: isSending } = useMutation({
@@ -30,7 +30,7 @@ export const RebootButton = ({ controllerId }: { controllerId: string }) => {
         reboot({ controllerId, command: { type: 'reboot' } });
     };
 
-    const isBusy = isSending || latest.isPending;
+    const isBusy = isSending || latest.isAwaiting;
 
     return (
         <div className="flex flex-col gap-2">

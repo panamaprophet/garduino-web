@@ -4,17 +4,12 @@ type Method = 'GET' | 'POST' | 'PATCH' | 'DELETE';
 
 type Query = Record<string, string | number | undefined>;
 
-export interface ApiErrorDetail {
+interface ApiErrorDetail {
     path: string;
     message: string;
 }
 
-export interface ApiResponse<TData, TMeta = {}> {
-    data: TData;
-    meta: TMeta & { requestId: string };
-}
-
-export class ApiError extends Error {
+class ApiError extends Error {
     constructor(
         readonly status: number,
         readonly code: string,
@@ -65,7 +60,7 @@ const toApiError = (status: number, body: unknown) => {
     return new ApiError(status, 'UNKNOWN', `Request failed with status ${status}`);
 };
 
-export const sendRequest = async <TData, TMeta = {}>(path: string, options: {
+export const sendRequest = async <TData>(path: string, options: {
     method?: Method,
     body?: unknown,
     query?: Query,
@@ -91,7 +86,7 @@ export const sendRequest = async <TData, TMeta = {}>(path: string, options: {
         throw toApiError(response.status, result);
     }
 
-    return result as ApiResponse<TData, TMeta>;
+    return (result as { data: TData }).data;
 };
 
 export const getErrorMessage = (error: unknown) => {

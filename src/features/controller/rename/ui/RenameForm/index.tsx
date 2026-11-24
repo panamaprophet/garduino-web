@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { queries, renameController } from '@/entities/controller';
+import { queries, updateController } from '@/entities/controller';
 import { getErrorMessage } from '@/shared/api/client';
 import { Button } from '@/shared/ui/Button';
 import { Input } from '@/shared/ui/Input';
@@ -13,7 +13,7 @@ export const RenameForm = ({ controllerId }: { controllerId: string }) => {
     const [draft, setDraft] = useState<string | null>(null);
 
     const { mutate: rename, isPending, error } = useMutation({
-        mutationFn: renameController,
+        mutationFn: updateController,
         onSuccess: async (renamed) => {
             queryClient.setQueryData(queries.get(controllerId).queryKey, renamed);
             setDraft(null);
